@@ -1044,6 +1044,17 @@ window.addEventListener('unhandledrejection',e=>{try{console.error('[KASH:rej]',
 </div>
 
 <!-- ADD -->
+<!-- RECEIPT FULL VIEWER -->
+<div class="ov" id="ov-receipt" style="z-index:200">
+  <div class="sheet" style="background:#000;height:100vh;max-height:100vh;border-radius:0;padding:0;display:flex;flex-direction:column">
+    <button onclick="closeOv('ov-receipt')" style="position:absolute;top:14px;right:14px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.15);color:#fff;border:none;font-size:20px;cursor:pointer;z-index:10">✕</button>
+    <div style="flex:1;display:flex;align-items:center;justify-content:center;overflow:auto;padding:12px">
+      <img id="ov-receipt-img" style="max-width:100%;max-height:100%;object-fit:contain">
+    </div>
+    <div style="background:rgba(0,0,0,.85);color:#fff;padding:14px 20px;font-size:12px;text-align:center;border-top:1px solid rgba(255,255,255,.1)">💡 Mantén pulsado el total en la imagen → Copiar → pega en el campo importe</div>
+  </div>
+</div>
+
 <div class="ov" id="ov-add"><div class="sheet">
   <div class="sh-hnd"></div><div class="sh-ttl">Nuevo movimiento</div>
   <div class="sh-body">
@@ -1059,6 +1070,17 @@ window.addEventListener('unhandledrejection',e=>{try{console.error('[KASH:rej]',
     <div class="fl"><div class="fl-lb">Nombre</div><input class="fi" id="add-nm" type="text" placeholder="Descripción" autocomplete="off"></div>
     <div class="fl"><div class="fl-lb">Fecha</div><input class="fi" id="add-dt" type="date"></div>
     <div class="fl"><div class="fl-lb">Nota (opcional)</div><input class="fi" id="add-nt" type="text" placeholder="Añade una nota…" autocomplete="off"></div>
+    <div class="fl"><div class="fl-lb">Foto del ticket (opcional)</div>
+      <div id="add-receipt-wrap" style="display:flex;flex-direction:column;gap:8px">
+        <button type="button" id="add-receipt-btn" onclick="$('add-receipt-input').click()" style="padding:11px 14px;background:var(--srf2);border:1.5px dashed var(--brd);border-radius:var(--rsm);cursor:pointer;font-size:13px;font-weight:600;color:var(--tx2);display:flex;align-items:center;justify-content:center;gap:8px"><span style="font-size:18px">📷</span><span>Hacer foto o elegir</span></button>
+        <input type="file" id="add-receipt-input" accept="image/*" capture="environment" style="display:none" onchange="onReceiptSelected(this,'add')">
+        <div id="add-receipt-preview" style="display:none;position:relative">
+          <img id="add-receipt-img" style="width:100%;max-height:280px;object-fit:contain;border-radius:var(--rsm);background:#000;cursor:pointer" onclick="openReceiptFull('add')">
+          <button type="button" onclick="clearReceipt('add')" style="position:absolute;top:6px;right:6px;width:30px;height:30px;border-radius:50%;background:rgba(0,0,0,.7);color:#fff;border:none;font-size:14px;cursor:pointer">✕</button>
+          <div style="font-size:11px;color:var(--tx3);margin-top:4px;text-align:center">💡 Toca el total en la foto y mantén pulsado para copiar (iOS Live Text)</div>
+        </div>
+      </div>
+    </div>
     <div class="fl" id="add-acc-fl" style="display:none"><div class="fl-lb">Cuenta</div><select class="fi" id="add-acc"></select></div>
     <div class="tog-row"><div><div class="tog-lb">Recurrente</div><div class="tog-sb">Se añade cada mes automáticamente</div></div><label class="tog"><input type="checkbox" id="add-rec"><span class="tog-sl"></span></label></div>
   </div>
@@ -1081,6 +1103,17 @@ window.addEventListener('unhandledrejection',e=>{try{console.error('[KASH:rej]',
     <div class="fl"><div class="fl-lb">Nombre</div><input class="fi" id="edit-nm" type="text" autocomplete="off"></div>
     <div class="fl"><div class="fl-lb">Fecha</div><input class="fi" id="edit-dt" type="date"></div>
     <div class="fl"><div class="fl-lb">Nota</div><input class="fi" id="edit-nt" type="text" autocomplete="off"></div>
+    <div class="fl"><div class="fl-lb">Foto del ticket</div>
+      <div id="edit-receipt-wrap" style="display:flex;flex-direction:column;gap:8px">
+        <button type="button" id="edit-receipt-btn" onclick="$('edit-receipt-input').click()" style="padding:11px 14px;background:var(--srf2);border:1.5px dashed var(--brd);border-radius:var(--rsm);cursor:pointer;font-size:13px;font-weight:600;color:var(--tx2);display:flex;align-items:center;justify-content:center;gap:8px"><span style="font-size:18px">📷</span><span>Hacer foto o elegir</span></button>
+        <input type="file" id="edit-receipt-input" accept="image/*" capture="environment" style="display:none" onchange="onReceiptSelected(this,'edit')">
+        <div id="edit-receipt-preview" style="display:none;position:relative">
+          <img id="edit-receipt-img" style="width:100%;max-height:280px;object-fit:contain;border-radius:var(--rsm);background:#000;cursor:pointer" onclick="openReceiptFull('edit')">
+          <button type="button" onclick="clearReceipt('edit')" style="position:absolute;top:6px;right:6px;width:30px;height:30px;border-radius:50%;background:rgba(0,0,0,.7);color:#fff;border:none;font-size:14px;cursor:pointer">✕</button>
+          <div style="font-size:11px;color:var(--tx3);margin-top:4px;text-align:center">💡 Toca el total en la foto y mantén pulsado para copiar (iOS Live Text)</div>
+        </div>
+      </div>
+    </div>
     <div class="fl" id="edit-acc-fl" style="display:none"><div class="fl-lb">Cuenta</div><select class="fi" id="edit-acc"></select></div>
     <div class="tog-row"><div><div class="tog-lb">Recurrente</div><div class="tog-sb">Se añade cada mes automáticamente</div></div><label class="tog"><input type="checkbox" id="edit-rec"><span class="tog-sl"></span></label></div>
     <button class="btn-del" onclick="delTxn()">Mover a papelera</button>
@@ -1551,9 +1584,17 @@ function saveTmpls(d){_lsSet(TMPLK,d)}
 function loadAccs(){const a=_ls(ACCK);return(a&&a.length)?a:[{id:'00000000-0000-4000-8000-000000000001',nm:'Personal',ic:'👤',color:'#0d9488',members:[]}]}
 function saveAccs(d){_lsSet(ACCK,d)}
 function getActiveAccId(){
+  const accs=loadAccs();
+  if(!accs.length)return 'default';
   const saved=loadC().activeAccId;
-  if(saved&&saved!=='default')return saved;
-  return loadAccs()[0]?.id||'default';
+  // Si hay una elegida guardada y existe en la lista, usarla
+  if(saved&&saved!=='default'&&accs.find(a=>a.id===saved))return saved;
+  // Si no, primera cuenta (la "Personal" por defecto, si la creó el bootstrap)
+  return accs[0].id;
+}
+// Cambia explícitamente la cuenta activa (usar cuando el usuario lo pide claramente)
+function setActiveAcc(accId){
+  const c=loadC();c.activeAccId=accId;saveC(c);
 }
 function multiAcc(){return loadAccs().length>1}
 function getCats(type){return [...(BASE_CATS[type]||[]),...loadCCats().filter(c=>c.type===type)]}
@@ -1915,6 +1956,15 @@ function renderHome(){
     autoLoadRecurring(cm,cy);
     _updateFabForRole();
     const accs=loadAccs();
+    // Sincronizar _activeSlide con la cuenta activa guardada (al cargar la app).
+    // Si el usuario tenía Personal seleccionada y entra en otro dispositivo, sigue en Personal.
+    const savedAccId=loadC().activeAccId;
+    if(savedAccId&&savedAccId!=='default'){
+      const savedIdx=accs.findIndex(a=>a.id===savedAccId);
+      if(savedIdx>=0&&savedIdx!==_activeSlide)_activeSlide=savedIdx;
+    }
+    // Si _activeSlide apunta fuera del rango (cuenta eliminada), volver al primero
+    if(_activeSlide>=accs.length)_activeSlide=0;
     const allTxns=loadT(cm,cy);
     const swiper=$('acc-swiper'),tabsEl=$('acc-tabs');
 
@@ -2186,7 +2236,7 @@ function buildTxrEl(t){
   const accs=loadAccs();
   const acc=accs.find(a=>a.id===t.accId);
   const accBadge=(acc&&multiAcc())?`<span style="font-size:9px;background:${escAttr(acc.color)}22;color:${escAttr(acc.color)};border-radius:4px;padding:1px 5px;font-weight:700">${esc(acc.ic)} ${esc(acc.nm)}</span>`:'';
-  card.innerHTML=`<div class="txr-ic ${esc(t.type)}">${esc(t.icon||'💰')}</div><div class="txr-inf"><div class="txr-nm">${esc(t.name)}</div><div class="txr-mt">${esc(t.cat||'')} · ${esc(fmtDate(t.date))}${t.recur?'<span class="rec-tag">🔄</span>':''}${accBadge}</div></div><div class="txr-rt"><div class="txr-am ${esc(t.type)}">${sign}${esc(fmt(t.amount))}</div>${t.note?`<div class="txr-nt">${esc(t.note)}</div>`:''}</div>`;
+  card.innerHTML=`<div class="txr-ic ${esc(t.type)}">${esc(t.icon||'💰')}</div><div class="txr-inf"><div class="txr-nm">${esc(t.name)}${t.receiptPath?'<span title="Tiene foto" style="margin-left:6px;font-size:11px;opacity:.7">📷</span>':''}</div><div class="txr-mt">${esc(t.cat||'')} · ${esc(fmtDate(t.date))}${t.recur?'<span class="rec-tag">🔄</span>':''}${accBadge}</div></div><div class="txr-rt"><div class="txr-am ${esc(t.type)}">${sign}${esc(fmt(t.amount))}</div>${t.note?`<div class="txr-nt">${esc(t.note)}</div>`:''}</div>`;
   card.addEventListener('click',()=>openEdit(t.id));
   // Long press
   let lpTimer=null;
@@ -2728,16 +2778,13 @@ async function saveAcc(){
     acc={id:newId,nm,ic,color,members:[],sharedMembers:[],syncShared:false};
     accs.push(acc);
   }
-  saveAccs(accs);closeOv('ov-acc');renderSettings();
+  saveAccs(accs);
+  // IMPORTANTE: nunca cambiar la cuenta activa al crear una nueva.
+  // El usuario debe pulsar la pestaña conscientemente para cambiar de cuenta.
+  closeOv('ov-acc');renderSettings();
   // Persistir en BD
   if(_authUser&&acc)await _pushAccount(acc);
-  if(isNew){
-    // Show invite prompt for new account
-    setTimeout(()=>{
-      editAccId=newId;
-      openShareAcc();
-    },300);
-  }else{toast('✅ Cuenta guardada')}
+  toast(isNew?'✅ Cuenta creada':'✅ Cuenta guardada');
 }
 async function delAcc(){
   if(loadAccs().length<=1){toast('❌ No puedes eliminar la única cuenta');return}
@@ -2830,7 +2877,8 @@ function _txnToRow(t){
     icon:String(t.icon||'💰').slice(0,8),
     date:t.date,
     note:t.note?String(t.note).slice(0,500):null,
-    recur:!!t.recur
+    recur:!!t.recur,
+    receipt_path:t.receiptPath?String(t.receiptPath).slice(0,500):null
     // created_by/updated_by los rellena RLS via trigger o el upsert
   };
 }
@@ -2848,6 +2896,7 @@ function _rowToTxn(r){
     date:r.date,
     note:r.note||'',
     recur:!!r.recur,
+    receiptPath:r.receipt_path||null,
     _v:r.version||1,
     _u:r.updated_at,
     _deleted:!!r.deleted_at
@@ -2958,14 +3007,85 @@ async function _deleteAccountRemote(accId){
 }
 
 // ════════════════════════════════════════════════════════════════════════
+// FOTOS DE TICKETS — Supabase Storage
+// ════════════════════════════════════════════════════════════════════════
+const RECEIPTS_BUCKET='kash-receipts';
+
+// Comprime una imagen antes de subir (ahorra ancho de banda y storage)
+async function _compressImage(file,maxW=1600,quality=0.85){
+  return new Promise((resolve,reject)=>{
+    const r=new FileReader();
+    r.onload=e=>{
+      const img=new Image();
+      img.onload=()=>{
+        const ratio=Math.min(1,maxW/img.width);
+        const w=Math.round(img.width*ratio),h=Math.round(img.height*ratio);
+        const canvas=document.createElement('canvas');
+        canvas.width=w;canvas.height=h;
+        const ctx=canvas.getContext('2d');
+        ctx.fillStyle='#fff';ctx.fillRect(0,0,w,h);
+        ctx.drawImage(img,0,0,w,h);
+        canvas.toBlob(blob=>{
+          if(!blob)return reject(new Error('compresión falló'));
+          resolve(blob);
+        },'image/jpeg',quality);
+      };
+      img.onerror=reject;
+      img.src=e.target.result;
+    };
+    r.onerror=reject;
+    r.readAsDataURL(file);
+  });
+}
+
+// Sube foto de ticket. Devuelve el path almacenado.
+async function _uploadReceipt(txnId,file){
+  if(!_sb||!_authUser)throw new Error('No autenticado');
+  if(!file)throw new Error('Sin archivo');
+  // Validación cliente
+  if(file.size>10*1024*1024)throw new Error('Foto demasiado grande (máx 10MB original)');
+  if(!/^image\//.test(file.type))throw new Error('Tipo no soportado');
+  // Comprime antes de subir
+  const blob=await _compressImage(file).catch(()=>file);
+  const ext='jpg';
+  const path=`${_authUser.id}/${safeId(txnId)}.${ext}`;
+  const{error}=await _sb.storage.from(RECEIPTS_BUCKET).upload(path,blob,{
+    cacheControl:'3600',upsert:true,contentType:'image/jpeg'
+  });
+  if(error)throw error;
+  return path;
+}
+
+// Cache de URLs firmadas para no regenerar constantemente
+const _receiptUrlCache=new Map();
+async function _getReceiptUrl(path){
+  if(!path||!_sb)return null;
+  const cached=_receiptUrlCache.get(path);
+  if(cached&&cached.expires>Date.now())return cached.url;
+  try{
+    const{data,error}=await _sb.storage.from(RECEIPTS_BUCKET).createSignedUrl(path,3600);
+    if(error||!data?.signedUrl)return null;
+    _receiptUrlCache.set(path,{url:data.signedUrl,expires:Date.now()+3300000});
+    return data.signedUrl;
+  }catch(e){return null}
+}
+
+async function _deleteReceipt(path){
+  if(!path||!_sb)return;
+  try{await _sb.storage.from(RECEIPTS_BUCKET).remove([path])}
+  catch(e){console.warn('[KASH] delete receipt:',e)}
+}
+
+// ════════════════════════════════════════════════════════════════════════
 // PULL — descarga inicial completa al iniciar sesión
 // ════════════════════════════════════════════════════════════════════════
 
 async function _pullAllData(){
   if(!_sb||!_syncReady||!_authUser)return false;
   try{
-    // 1) Cuentas (RLS solo devolverá las accesibles)
-    const{data:accRows,error:e1}=await _sb.from('kash_accounts').select('*');
+    // 1) Cuentas (RLS solo devolverá las accesibles), ordenadas por fecha de creación
+    // para que la primera (Personal por defecto) sea siempre la más antigua.
+    const{data:accRows,error:e1}=await _sb.from('kash_accounts').select('*').order('created_at',{ascending:true});
     if(e1)throw e1;
 
     // ── BOOTSTRAP: si la BD está vacía y tenemos cuentas locales, subirlas
@@ -3180,6 +3300,7 @@ function _onRemoteAccountChange(payload){
         updated.sharedMembers=accs[idx].sharedMembers||[];
         accs[idx]=updated;
       }else{
+        // Cuenta nueva: la añadimos al final, no cambiamos la activa.
         accs.push(updated);
       }
       saveAccs(accs);
@@ -3255,6 +3376,7 @@ async function _initSync(){
     // Vacía outbox de operaciones pendientes (offline previo)
     _outboxFlush();
     if(typeof renderAll==='function')renderAll();
+    _syncDarkModeFromCloud();
     console.log('[KASH] sync v2 ready · channels:',Object.keys(_rtChannels));
   }catch(e){console.error('[KASH] init:',e);_syncUI('error')}
 }
@@ -3613,6 +3735,13 @@ function toggleDark(){
   document.body.classList.toggle('dark',dark);
   const tnm=$('theme-nm');if(tnm)tnm.textContent=dark?'Modo oscuro':'Modo claro';
   try{localStorage.setItem('n_dark',dark?'1':'0')}catch{}
+  // Persistir en Supabase para que sobreviva a reinstalación de PWA
+  if(_sb&&_authUser&&_syncReady){
+    _sbUpsertSafe('kash_user_data',
+      {user_id:_authUser.id,data_key:'n_dark',data_value:dark?'1':'0',updated_at:new Date().toISOString()},
+      {onConflict:'user_id,data_key'}
+    );
+  }
 }
 function applyDark(){
   const stored=localStorage.getItem('n_dark');
@@ -3622,6 +3751,24 @@ function applyDark(){
   else if(window.matchMedia)d=window.matchMedia('(prefers-color-scheme: dark)').matches;
   document.body.classList.toggle('dark',d);
   const tt=$('theme-tog');if(tt)tt.checked=d;
+  const tnm=$('theme-nm');if(tnm)tnm.textContent=d?'Modo oscuro':'Modo claro';
+}
+// Llamado tras hidratar desde Supabase: si la BD tiene una preferencia diferente a local,
+// aplica la de la BD (la nube es la fuente de verdad cuando reinstalas la PWA)
+async function _syncDarkModeFromCloud(){
+  if(!_sb||!_authUser||!_syncReady)return;
+  try{
+    const{data}=await _sb.from('kash_user_data').select('data_value').eq('user_id',_authUser.id).eq('data_key','n_dark').maybeSingle();
+    if(data&&data.data_value!=null){
+      const cloudDark=String(data.data_value)==='1';
+      const localStored=localStorage.getItem('n_dark');
+      // Si local no tiene valor (PWA recién instalada) o difiere, aplica el de la nube
+      if(localStored===null||localStored!==(cloudDark?'1':'0')){
+        localStorage.setItem('n_dark',cloudDark?'1':'0');
+        applyDark();
+      }
+    }
+  }catch(e){console.warn('[KASH] sync dark:',e)}
 }
 
 // ── NAVIGATION ──
@@ -3659,13 +3806,152 @@ function openAdd(){
   const dt=$('add-dt');if(dt)dt.value=todayStr();
   const rec=$('add-rec');if(rec)rec.checked=false;
   const rh=$('add-rh');if(rh)rh.style.display='none';
+  // Reset receipt state
+  _addReceiptFile=null;_addReceiptPath=null;
+  const ap=$('add-receipt-preview');if(ap)ap.style.display='none';
+  const ab=$('add-receipt-btn');if(ab)ab.style.display='flex';
   buildCatGrid('add-cats',lastType,null);
   // Account selector
   const accFl=$('add-acc-fl'),accSel=$('add-acc');
   if(accFl&&accSel){const accs=loadAccs();if(accs.length>1){accFl.style.display='block';accSel.innerHTML=accs.map(a=>`<option value="${escAttr(a.id)}">${esc(a.ic)} ${esc(a.nm)}</option>`).join('');accSel.value=getActiveAccId()}else accFl.style.display='none'}
   $('ov-add')?.classList.add('op');setTimeout(()=>$('add-am')?.focus(),300);
+  // Listener de auto-categorización (debounced)
+  const nm=$('add-nm');
+  if(nm&&!nm._catHintWired){
+    nm.addEventListener('input',debounce(_applyCategoryHint,250));
+    nm._catHintWired=true;
+  }
 }
 function setAddT(t){addType=t;selAddCat=null;localStorage.setItem('kash_last_addtype',t);document.querySelectorAll('#add-tt .ttab').forEach(b=>b.classList.toggle('on',b.dataset.t===t));buildCatGrid('add-cats',t,null)}
+
+// ── RECEIPTS (fotos de tickets) ──
+// Estado temporal del modal: archivo pendiente de subir (no subido aún para no
+// ocupar storage si el usuario cancela) y/o path de foto ya guardada (modo edit).
+let _addReceiptFile=null,_addReceiptPath=null;       // add modal
+let _editReceiptFile=null,_editReceiptPath=null;     // edit modal
+
+async function onReceiptSelected(input,which){
+  const file=input.files?.[0];
+  if(!file)return;
+  if(file.size>10*1024*1024){toast('❌ Foto demasiado grande (máx 10MB)');input.value='';return}
+  if(!/^image\//.test(file.type)){toast('❌ Selecciona una imagen');input.value='';return}
+  // Mostrar preview local
+  const url=URL.createObjectURL(file);
+  if(which==='add'){
+    _addReceiptFile=file;
+    const img=$('add-receipt-img');if(img)img.src=url;
+    const prev=$('add-receipt-preview');if(prev)prev.style.display='block';
+    const btn=$('add-receipt-btn');if(btn)btn.style.display='none';
+  }else{
+    _editReceiptFile=file;
+    const img=$('edit-receipt-img');if(img)img.src=url;
+    const prev=$('edit-receipt-preview');if(prev)prev.style.display='block';
+    const btn=$('edit-receipt-btn');if(btn)btn.style.display='none';
+  }
+  input.value='';
+}
+function clearReceipt(which){
+  if(which==='add'){
+    _addReceiptFile=null;_addReceiptPath=null;
+    const prev=$('add-receipt-preview');if(prev)prev.style.display='none';
+    const btn=$('add-receipt-btn');if(btn)btn.style.display='flex';
+    const img=$('add-receipt-img');if(img)img.src='';
+  }else{
+    _editReceiptFile=null;_editReceiptPath=null;
+    const prev=$('edit-receipt-preview');if(prev)prev.style.display='none';
+    const btn=$('edit-receipt-btn');if(btn)btn.style.display='flex';
+    const img=$('edit-receipt-img');if(img)img.src='';
+  }
+}
+async function openReceiptFull(which){
+  let url=null;
+  if(which==='add'){
+    if(_addReceiptFile)url=URL.createObjectURL(_addReceiptFile);
+    else if(_addReceiptPath)url=await _getReceiptUrl(_addReceiptPath);
+  }else{
+    if(_editReceiptFile)url=URL.createObjectURL(_editReceiptFile);
+    else if(_editReceiptPath)url=await _getReceiptUrl(_editReceiptPath);
+  }
+  if(!url){toast('❌ No se puede mostrar la foto');return}
+  const img=$('ov-receipt-img');if(img)img.src=url;
+  $('ov-receipt')?.classList.add('op');
+}
+
+// ── AUTO-CATEGORIZACIÓN ──
+// Construye un índice de "descripción → categoría más usada" a partir del histórico.
+// Cuando el usuario escribe en el campo nombre, sugiere la categoría que usó la última vez
+// con descripciones similares.
+function _buildCategoryHints(type){
+  // Recorre últimos 12 meses del tipo concreto y agrupa por nombre normalizado
+  const hints=new Map();
+  for(let yr=cy-1;yr<=cy;yr++){
+    for(let mo=0;mo<12;mo++){
+      const arr=loadT(mo,yr).filter(t=>t.type===type);
+      for(const t of arr){
+        const k=String(t.name||'').toLowerCase().trim();
+        if(!k)continue;
+        const e=hints.get(k)||{};
+        e[t.catId]=(e[t.catId]||0)+1;
+        hints.set(k,e);
+      }
+    }
+  }
+  return hints;
+}
+function _suggestCategory(name,type){
+  if(!name||name.length<3)return null;
+  const hints=_buildCategoryHints(type);
+  const q=name.toLowerCase().trim();
+  // Buscar match exacto primero, luego prefijo, luego inclusión
+  let best=null,bestScore=0;
+  for(const[k,catCounts] of hints){
+    let score=0;
+    if(k===q)score=100;
+    else if(k.startsWith(q)||q.startsWith(k))score=70;
+    else if(k.includes(q)||q.includes(k))score=40;
+    if(score>bestScore){
+      // Coger la categoría más usada para esta clave
+      let topCat=null,topCount=0;
+      for(const[catId,count] of Object.entries(catCounts)){
+        if(count>topCount){topCount=count;topCat=catId}
+      }
+      if(topCat){best=topCat;bestScore=score}
+    }
+  }
+  return best;
+}
+function _applyCategoryHint(){
+  const nm=$('add-nm')?.value;
+  if(!nm)return;
+  // No sobreescribir si el usuario ya seleccionó manualmente
+  if(selAddCat&&selAddCat._userPicked)return;
+  const suggestedId=_suggestCategory(nm,addType);
+  if(!suggestedId)return;
+  const cats=getCats(addType);
+  const idx=cats.findIndex(c=>c.id===suggestedId);
+  if(idx<0)return;
+  const c=cats[idx];
+  // Aplica visualmente sin romper el flujo
+  document.querySelectorAll('#add-cats .cb').forEach(b=>b.classList.remove('sel'));
+  const btns=document.querySelectorAll('#add-cats .cb');
+  if(btns[idx])btns[idx].classList.add('sel');
+  selAddCat={id:c.id,n:c.n,i:c.i};
+}
+// Igual para edit
+function _applyCategoryHintEdit(){
+  const nm=$('edit-nm')?.value;
+  if(!nm||(selEditCat&&selEditCat._userPicked))return;
+  const suggestedId=_suggestCategory(nm,editType);
+  if(!suggestedId)return;
+  const cats=getCats(editType);
+  const idx=cats.findIndex(c=>c.id===suggestedId);
+  if(idx<0)return;
+  const c=cats[idx];
+  document.querySelectorAll('#edit-cats .cb').forEach(b=>b.classList.remove('sel'));
+  const btns=document.querySelectorAll('#edit-cats .cb');
+  if(btns[idx])btns[idx].classList.add('sel');
+  selEditCat={id:c.id,n:c.n,i:c.i};
+}
 
 function buildCatGrid(containerId,type,selId){
   const el=$(containerId);if(!el)return;
@@ -3680,31 +3966,38 @@ function buildCatGrid(containerId,type,selId){
 function selectCat(gid,cid,cn,ci,type,idx){
   document.querySelectorAll('#'+gid+' .cb').forEach(b=>b.classList.remove('sel'));
   const btns=document.querySelectorAll('#'+gid+' .cb');if(btns[idx])btns[idx].classList.add('sel');
-  const cat={id:cid,n:cn,i:ci};
+  const cat={id:cid,n:cn,i:ci,_userPicked:true};
   if(gid==='add-cats'){selAddCat=cat;const nm=$('add-nm');if(nm&&(!nm.value||getCats(addType).some(c=>c.n===nm.value)))nm.value=cn}
   else if(gid==='edit-cats'){selEditCat=cat}
   else if(gid==='tmpl-cats'){selTmplCat=cat}
 }
-function saveAdd(){
+async function saveAdd(){
   if(_isObserver()){toast('👁 Solo puedes ver esta cuenta');return}
   const amt=parseFloat($('add-am')?.value)||0;if(!amt)return;
   const cat=selAddCat||getCats(addType)[0];
   // Always use real account ID — never 'default'
   const _accs=loadAccs();
   const accId=(multiAcc()&&$('add-acc')?.value)||getActiveAccId()||_accs[0]?.id||'default';
-  // Resolve to actual acc object to get the real ID
   const _activeAcc=_accs.find(a=>a.id===accId)||_accs[0];
   const finalAccId=_activeAcc?.id||accId;
   const t={id:uid(),type:addType,catId:cat.id,cat:String(cat.n||'').slice(0,80),icon:String(cat.i||'💰').slice(0,8),name:(($('add-nm')?.value.trim()||cat.n)||'').slice(0,120),amount:amt,date:($('add-dt')?.value||todayStr()),note:(($('add-nt')?.value.trim()||'')).slice(0,500),recur:($('add-rec')?.checked||false),accId:finalAccId};
   try{validateTxn(t)}catch(e){toast('❌ '+e.message);return}
-  const txns=loadT(cm,cy);txns.push(t);saveT(cm,cy,txns);updateStreak();closeOv('ov-add');_invalidateSearchIndex();renderAll();
+  // Subir foto si hay (si falla, guardamos el txn igual sin foto)
+  if(_addReceiptFile&&_authUser&&_sb){
+    try{
+      const path=await _uploadReceipt(t.id,_addReceiptFile);
+      t.receiptPath=path;
+    }catch(e){console.warn('[KASH] upload receipt:',e);toast('⚠️ Foto no subida: '+(e.message||'error'))}
+  }
+  const txns=loadT(cm,cy);txns.push(t);saveT(cm,cy,txns);updateStreak();
+  _addReceiptFile=null;_addReceiptPath=null;
+  closeOv('ov-add');_invalidateSearchIndex();renderAll();
 }
 
 // ── EDIT TRANSACTION ──
-function openEdit(id){
+async function openEdit(id){
   try{
     const t=loadT(cm,cy).find(x=>x.id===id);if(!t)return;
-    // Observers can't edit
     if(_isObserver()){toast('👁 Solo puedes ver esta cuenta');return}
     editId=id;editType=t.type;selEditCat={id:t.catId,n:t.cat||'',i:t.icon||'💰'};
     document.querySelectorAll('#edit-tt .ttab').forEach(b=>b.classList.toggle('on',b.dataset.t===t.type));
@@ -3715,14 +4008,31 @@ function openEdit(id){
     const er=$('edit-rec');if(er)er.checked=t.recur||false;
     const eh=$('edit-rh');if(eh)eh.style.display='none';
     buildCatGrid('edit-cats',t.type,t.catId);
+    // Reset receipt state y mostrar foto existente si la hay
+    _editReceiptFile=null;
+    _editReceiptPath=t.receiptPath||null;
+    const epPrev=$('edit-receipt-preview'),epBtn=$('edit-receipt-btn'),epImg=$('edit-receipt-img');
+    if(_editReceiptPath){
+      const url=await _getReceiptUrl(_editReceiptPath);
+      if(url&&epImg){epImg.src=url}
+      if(epPrev)epPrev.style.display='block';
+      if(epBtn)epBtn.style.display='none';
+    }else{
+      if(epPrev)epPrev.style.display='none';
+      if(epBtn)epBtn.style.display='flex';
+      if(epImg)epImg.src='';
+    }
     // Account selector
     const accFl=$('edit-acc-fl'),accSel=$('edit-acc');
     if(accFl&&accSel){const accs=loadAccs();if(accs.length>1){accFl.style.display='block';accSel.innerHTML=accs.map(a=>`<option value="${escAttr(a.id)}">${esc(a.ic)} ${esc(a.nm)}</option>`).join('');accSel.value=t.accId||getActiveAccId()}else accFl.style.display='none'}
+    // Auto-categorización al editar
+    const en2=$('edit-nm');
+    if(en2&&!en2._catHintWired){en2.addEventListener('input',debounce(_applyCategoryHintEdit,250));en2._catHintWired=true}
     $('ov-edit')?.classList.add('op');
   }catch(e){console.warn('openEdit:',e)}
 }
 function setEditT(t){editType=t;selEditCat=null;document.querySelectorAll('#edit-tt .ttab').forEach(b=>b.classList.toggle('on',b.dataset.t===t));buildCatGrid('edit-cats',t,null)}
-function saveEdit(){
+async function saveEdit(){
   if(_isObserver()){toast('👁 Solo puedes ver esta cuenta');return}
   const txns=loadT(cm,cy),idx=txns.findIndex(x=>x.id===editId);if(idx<0)return;
   const cat=selEditCat||getCats(editType)[0];const amt=parseFloat($('edit-am')?.value)||0;if(!amt)return;
@@ -3731,7 +4041,21 @@ function saveEdit(){
   const accId=(_accs2.find(a=>a.id===rawAccId)||_accs2[0])?.id||rawAccId;
   const updated={...txns[idx],type:editType,catId:cat.id,cat:String(cat.n||'').slice(0,80),icon:String(cat.i||'💰').slice(0,8),name:(($('edit-nm')?.value.trim()||cat.n)||'').slice(0,120),amount:amt,date:($('edit-dt')?.value||todayStr()),note:(($('edit-nt')?.value.trim()||'')).slice(0,500),recur:($('edit-rec')?.checked||false),accId};
   try{validateTxn(updated)}catch(e){toast('❌ '+e.message);return}
+  // Gestionar foto: nueva, mantener existente o eliminar
+  if(_editReceiptFile){
+    try{
+      const path=await _uploadReceipt(updated.id,_editReceiptFile);
+      updated.receiptPath=path;
+    }catch(e){toast('⚠️ Foto no subida: '+(e.message||'error'))}
+  }else if(_editReceiptPath){
+    updated.receiptPath=_editReceiptPath;
+  }else if(txns[idx].receiptPath){
+    // El usuario eliminó la foto que había
+    _deleteReceipt(txns[idx].receiptPath);
+    updated.receiptPath=null;
+  }
   txns[idx]=updated;
+  _editReceiptFile=null;_editReceiptPath=null;
   saveT(cm,cy,txns);closeOv('ov-edit');_invalidateSearchIndex();renderAll();
 }
 function delTxn(){if(!confirm('¿Mover a papelera?'))return;trashTxn(editId);closeOv('ov-edit')}
