@@ -1435,11 +1435,31 @@ async function _outboxFlush(){
     }
   }finally{_flushingOutbox=false}
 }
-window.addEventListener('online',()=>setTimeout(_outboxFlush,500));
-// Page Visibility — pausa polling cuando la app está oculta (ahorra batería + CPU)
-document.addEventListener('visibilitychange',()=>{
-  if(document.hidden){if(_pollTimer){clearInterval(_pollTimer);_pollTimer=null}}
-  else{if(_sb&&_syncReady&&!_pollTimer)_startPolling()}
+window.addEventListener('online',()=>setTimeout(()=>{_outboxFlush();if(_sb&&_authUser){_pullAllData();_startRealtime()}},500));
+// Page Visibility — al volver al foreground, fuerza pull + reconecta Realtime.
+// iOS suspende WebSockets en background; sin esto, la app pierde cambios remotos.
+document.addEventListener('visibilitychange',async()=>{
+  if(document.hidden){
+    // No hagas nada al ocultarse — Realtime se mantiene si puede; iOS lo cerrará igual.
+    return;
+  }
+  // Volvió a primer plano
+  if(!_sb||!_authUser)return;
+  try{
+    // 1) Pull inmediato para no esperar al WebSocket
+    await _pullAllData();
+    // 2) Reconectar Realtime (si seguía vivo, esto es no-op; si murió, vuelve a engancharse)
+    await _startRealtime();
+    // 3) Vaciar outbox por si había pushes pendientes
+    _outboxFlush();
+    if(typeof renderAll==='function')renderAll();
+  }catch(e){console.warn('[KASH] resume:',e)}
+});
+// También al cargar la página (cubre caso PWA recién abierta tras estar suspendida)
+window.addEventListener('pageshow',e=>{
+  if(e.persisted&&_sb&&_authUser){
+    _pullAllData().then(()=>_startRealtime()).then(()=>typeof renderAll==='function'&&renderAll());
+  }
 });
 
 // ── Wrapper push con outbox: si falla la red, persiste para reintento ──
@@ -3006,6 +3026,34 @@ async function _pullAllData(){
     memoInvalidate('bal:');_invalidateSearchIndex();
     _hydrated=true;
     console.log('[KASH] hydrated: accounts='+(accRows?.length||0)+' txns='+(byMonthCount(localAccs)||'0'));
+
+    // RECONCILIADOR: sube cualquier txn local que no esté en BD.
+    // Cubre el caso: usuario añadió antes de _hydrated, push falló, etc.
+    try{
+      const remoteIds=new Set();
+      if(accIds.length){
+        const{data:allRemote}=await _sb.from('kash_txns').select('id').is('deleted_at',null);
+        (allRemote||[]).forEach(r=>remoteIds.add(r.id));
+      }
+      const writableAccIds=new Set(loadAccs().filter(a=>!_isObserverFor(a)).map(a=>a.id));
+      const orphaned=[];
+      for(let yr=cy-2;yr<=cy+1;yr++){
+        for(let mo=0;mo<12;mo++){
+          const arr=_MC[TK(mo,yr)]||JSON.parse(localStorage.getItem(TK(mo,yr))||'[]');
+          for(const t of arr){
+            if(t&&t.id&&t.accId&&!remoteIds.has(t.id)&&writableAccIds.has(t.accId)){
+              orphaned.push(t);
+            }
+          }
+        }
+      }
+      if(orphaned.length){
+        console.log('[KASH] reconciliando '+orphaned.length+' txns locales no presentes en BD');
+        for(const t of orphaned)await _pushTxn(t);
+      }
+    }catch(e){console.warn('[KASH] reconciler:',e)}
+
+    setTimeout(()=>_outboxFlush(),200);
     return true;
   }catch(e){
     console.error('[KASH] pull failed:',e.message);
@@ -3025,27 +3073,53 @@ function _stopRealtime(){
 }
 
 async function _startRealtime(){
-  if(!_sb||!_syncReady)return;
+  if(!_sb||!_syncReady||!_authUser){
+    console.warn('[KASH] realtime: not ready (sb='+!!_sb+',syncReady='+_syncReady+',user='+!!_authUser+')');
+    return;
+  }
   _stopRealtime();
-  // Suscribirse a cambios en TODAS las cuentas accesibles (RLS hace el filtrado)
-  // Una sola suscripción global a kash_txns es más eficiente que una por cuenta.
   try{
-    const ch=_sb.channel('kash_txns_global')
+    // CRÍTICO: pasar el JWT al canal Realtime antes de suscribir.
+    // Sin esto, RLS bloquea los eventos postgres_changes y nunca llegan.
+    const{data:sess}=await _sb.auth.getSession();
+    const token=sess?.session?.access_token;
+    if(token&&_sb.realtime?.setAuth){
+      _sb.realtime.setAuth(token);
+      console.log('[KASH] realtime: auth token set');
+    }else{
+      console.warn('[KASH] realtime: no token to set, eventos pueden bloquearse por RLS');
+    }
+
+    const ch=_sb.channel('kash_realtime_'+Date.now(),{config:{broadcast:{self:false},presence:{key:''}}})
       .on('postgres_changes',{event:'*',schema:'public',table:'kash_txns'},payload=>{
+        console.log('[KASH] rt txn:',payload.eventType,payload.new?.id||payload.old?.id);
         _onRemoteTxnChange(payload);
       })
       .on('postgres_changes',{event:'*',schema:'public',table:'kash_account_members'},payload=>{
+        console.log('[KASH] rt member:',payload.eventType);
         _onRemoteMemberChange(payload);
       })
       .on('postgres_changes',{event:'*',schema:'public',table:'kash_accounts'},payload=>{
+        console.log('[KASH] rt account:',payload.eventType);
         _onRemoteAccountChange(payload);
       })
-      .subscribe(status=>{
-        if(status==='SUBSCRIBED'){console.log('[KASH] realtime connected');_syncUI('on')}
-        else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'){console.warn('[KASH] realtime error:',status);_syncUI('error')}
+      .subscribe((status,err)=>{
+        console.log('[KASH] realtime status:',status,err?.message||'');
+        if(status==='SUBSCRIBED'){_syncUI('on')}
+        else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'||status==='CLOSED'){
+          _syncUI('error');
+          // Auto-reintento en 5s si el canal muere
+          setTimeout(()=>{if(_sb&&_authUser&&!_rtChannels.global)_startRealtime()},5000);
+        }
       });
     _rtChannels.global=ch;
-  }catch(e){console.warn('[KASH] startRealtime:',e)}
+    // Safety net: pull cada 30s en caso de que el WebSocket se duerma (típico en iOS PWA).
+    if(_pollTimer)clearInterval(_pollTimer);
+    _pollTimer=setInterval(()=>{
+      if(document.hidden||!_sb||!_authUser)return;
+      _pullAllData().then(ok=>{if(ok&&typeof renderAll==='function')renderAll()}).catch(()=>{});
+    },30000);
+  }catch(e){console.error('[KASH] startRealtime:',e)}
 }
 
 function _onRemoteTxnChange(payload){
@@ -3121,17 +3195,28 @@ function _stopSync(){
   _stopRealtime();_sb=null;_syncReady=false;_syncUI('off');
 }
 
-// Hook llamado tras cada saveT — empuja solo las txns que cambiaron
+// Hook llamado tras cada saveT — empuja TODAS las txns del mes a la BD.
+// Si _hydrated todavía no es true, las metemos en outbox para reintento.
 async function _sbPush(key,allTxns){
-  if(!_sb||!_syncReady||!_authUser||!key.startsWith('ntx_'))return;
-  if(!_hydrated)return; // evita pushes durante la primera carga
-  // Comparar con remoto sería costoso; en su lugar, push de todas las txns
-  // del mes que pertenezcan a cuentas con permiso de escritura.
-  // En un schema relacional el upsert por id es idempotente y no rompe nada.
+  if(!_authUser||!key.startsWith('ntx_'))return;
+  if(!_sb||!_syncReady){
+    // No hay conexión todavía: cola las txns para cuando la haya
+    for(const t of allTxns||[]){
+      if(t&&t.accId)_outboxAdd({kind:'txn_upsert',txn:t});
+    }
+    return;
+  }
   const accs=loadAccs();
   const writableIds=new Set(accs.filter(a=>!_isObserverFor(a)).map(a=>a.id));
   for(const t of allTxns){
-    if(!t.accId||!writableIds.has(t.accId))continue;
+    if(!t||!t.accId)continue;
+    // Si la txn pertenece a una cuenta donde no tengo permiso, skip silencioso (RLS lo bloquearía)
+    if(accs.find(a=>a.id===t.accId)&&!writableIds.has(t.accId))continue;
+    // Push: si _hydrated=false (carga inicial en curso), va a outbox y se reintenta tras hidratar
+    if(!_hydrated){
+      _outboxAdd({kind:'txn_upsert',txn:t});
+      continue;
+    }
     await _pushTxn(t);
   }
 }
@@ -3159,21 +3244,19 @@ async function _initSync(){
   try{
     if(!window.supabase){setTimeout(_initSync,600);return}
     if(!_authUser){_syncUI('off');return}
-    if(_sb&&_syncReady&&_hydrated){_syncUI('on');return}
+    if(_sb&&_syncReady&&_hydrated&&_rtChannels.global){_syncUI('on');return}
     _syncUI('connecting');
     const ok=await _initSB();
     if(!ok){_syncUI('error');toast('❌ Sin conexión a la BD');return}
-    // Pull completo
-    const pulled=await _pullAllData();
-    if(!pulled){_syncUI('error');return}
-    // Suscripciones realtime
+    // Pull completo (puede dar false si la BD está vacía, no es error)
+    await _pullAllData();
+    // Suscripciones realtime (CRÍTICO: siempre intentamos arrancar Realtime)
     await _startRealtime();
     // Vacía outbox de operaciones pendientes (offline previo)
     _outboxFlush();
-    _syncUI('on');
     if(typeof renderAll==='function')renderAll();
-    console.log('[KASH] sync v2 ready');
-  }catch(e){console.error('[KASH] init:',e);_syncUI('error');_sb=null}
+    console.log('[KASH] sync v2 ready · channels:',Object.keys(_rtChannels));
+  }catch(e){console.error('[KASH] init:',e);_syncUI('error')}
 }
 
 function toggleSync(on){
@@ -4124,11 +4207,14 @@ async function _onAuthSuccess(user){
   toast('✅ ¡Bienvenido!');
   setTimeout(async()=>{
     try{
-      const had=await _pullUserData(user.id);
-      if(!had)_pushUserData(user.id).catch(()=>{});
+      // Siempre arrancamos sync si hay usuario: la sincronización entre
+      // dispositivos del mismo usuario también va por aquí.
+      _setupUserSync(user.id);
+      await _initSync();
+      // Tras hidratar, propagar datos personales si la BD está vacía
+      const{data:check}=await _sb.from('kash_user_data').select('data_key').limit(1);
+      if(!check||!check.length)_pushUserData(user.id).catch(()=>{});
       else{try{renderHome();toast('☁️ Datos sincronizados')}catch(e){}}
-      const hasShared=loadAccs().some(a=>a.syncShared&&a.syncCode);
-      if(hasShared)_initSync().catch(()=>{});
     }catch(e){console.warn('[KASH] bg sync:',e)}
   },800);
 }
