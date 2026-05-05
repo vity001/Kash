@@ -1276,9 +1276,18 @@ window.addEventListener('unhandledrejection',e=>{try{console.error('[KASH:rej]',
   <div class="sh-body">
     <!-- CÓDIGO — protagonista -->
     <div onclick="shareVia('copy')" style="background:var(--ac);border-radius:var(--rad);padding:20px;text-align:center;cursor:pointer;active:opacity:.85">
-      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,.7);margin-bottom:8px">Código de acceso · toca para copiar</div>
-      <div style="font-family:'Syne',sans-serif;font-size:42px;font-weight:800;color:#fff;letter-spacing:6px" id="fam-code-share">——</div>
-      <div style="font-size:11px;color:rgba(255,255,255,.6);margin-top:6px">La otra persona lo escribe en su KASH</div>
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,.7);margin-bottom:8px">Código de invitación · toca para copiar</div>
+      <div style="font-family:'Syne',sans-serif;font-size:38px;font-weight:800;color:#fff;letter-spacing:4px" id="fam-code-share">——</div>
+      <div style="font-size:11px;color:rgba(255,255,255,.7);margin-top:6px">Caduca en 7 días · un solo uso</div>
+    </div>
+    <!-- Instrucciones para el destinatario -->
+    <div style="background:var(--acl);border-left:3px solid var(--ac);border-radius:var(--rsm);padding:12px 14px">
+      <div style="font-size:12px;font-weight:800;color:var(--acd);margin-bottom:6px">📲 Cómo se une la otra persona</div>
+      <div style="font-size:12px;color:var(--tx2);line-height:1.6">
+        1. Abre KASH e inicia sesión con su email<br>
+        2. Ajustes → "¿Alguien te ha invitado?"<br>
+        3. Pega el código y pulsa "Unirse"
+      </div>
     </div>
     <!-- Rol -->
     <div style="display:flex;align-items:center;justify-content:space-between;background:var(--srf2);border:1.5px solid var(--brd);border-radius:var(--rsm);padding:13px 15px">
@@ -1290,16 +1299,20 @@ window.addEventListener('unhandledrejection',e=>{try{console.error('[KASH:rej]',
     </div>
     <!-- Nombre opcional -->
     <input class="fi" id="share-name" type="text" placeholder="Nombre del invitado (opcional)" autocomplete="off" oninput="onShareNameChange()">
-    <!-- Canales -->
+    <!-- Acción principal: copiar mensaje completo listo para WhatsApp -->
+    <button onclick="shareVia('copy_msg')" style="width:100%;padding:14px;background:var(--ac);color:#fff;border:none;border-radius:var(--rsm);font-size:14px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px">
+      <span style="font-size:18px">📋</span><span>Copiar mensaje listo para enviar</span>
+    </button>
+    <div style="font-size:11px;color:var(--tx3);text-align:center;margin-top:-4px">Pega el mensaje en WhatsApp, SMS o donde quieras</div>
+    <!-- Canales secundarios -->
+    <div style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.08em;margin-top:6px">O envía directo</div>
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
       <div class="share-ch" onclick="shareVia('whatsapp')" style="background:#dcf8c6"><div class="share-ch-ic">📱</div><div class="share-ch-nm">WhatsApp</div></div>
       <div class="share-ch" onclick="shareVia('telegram')" style="background:#d4eeff"><div class="share-ch-ic">✈️</div><div class="share-ch-nm">Telegram</div></div>
       <div class="share-ch" onclick="shareVia('sms')" style="background:#e8e4ff"><div class="share-ch-ic">💬</div><div class="share-ch-nm">SMS</div></div>
       <div class="share-ch" onclick="shareVia('email')" style="background:#fce4d4"><div class="share-ch-ic">📧</div><div class="share-ch-nm">Email</div></div>
-      <div class="share-ch" onclick="shareVia('copy')" style="background:var(--srf2)"><div class="share-ch-ic">📋</div><div class="share-ch-nm">Copiar</div></div>
-      <div class="share-ch" onclick="shareVia('twitter')" style="background:#e2f4ff"><div class="share-ch-ic">🐦</div><div class="share-ch-nm">Twitter</div></div>
       <div class="share-ch" onclick="shareVia('native')" style="background:var(--acl)"><div class="share-ch-ic" style="color:var(--acd)">⬆️</div><div class="share-ch-nm" style="color:var(--acd)">Más</div></div>
-      <div class="share-ch" onclick="downloadQR()" style="background:#fff3cd"><div class="share-ch-ic">⬇️</div><div class="share-ch-nm">Guardar QR</div></div>
+      <div class="share-ch" onclick="downloadQR()" style="background:#fff3cd"><div class="share-ch-ic">⬇️</div><div class="share-ch-nm">QR</div></div>
     </div>
     <!-- QR pequeño, secundario -->
     <details style="text-align:center">
@@ -1815,20 +1828,29 @@ function renderWeekCard(){
   const today=new Date(),dow=today.getDay();
   const days=[];
   for(let i=6;i>=0;i--){const d=new Date(today);d.setDate(d.getDate()-i);days.push(d)}
-  const txns=loadT(cm,cy);
+  // Filtrar por cuenta activa (igual que el resumen mensual)
+  const accs=loadAccs();
+  const activeAcc=accs.find(a=>a.id===getActiveAccId())||accs[0];
+  const txns=_accTxns(activeAcc,loadT(cm,cy));
   const dayAmts=days.map(d=>{const ds=_localDateStr(d);return txns.filter(t=>t.date===ds&&t.type==='gas').reduce((s,t)=>s+t.amount,0)});
   const weekTotal=dayAmts.reduce((a,b)=>a+b,0);
   if(weekTotal===0){el.innerHTML='';return}
   const maxAmt=Math.max(...dayAmts,1);
-  const bars=days.map((d,i)=>{const isTod=i===6;const h=Math.max(4,Math.round(dayAmts[i]/maxAmt*36));return`<div class="week-day${isTod?' week-day-hoy':''}"><div class="week-day-lbl">${DAYS[d.getDay()]}</div><div class="week-day-bar" style="height:40px"><div class="week-day-fill" style="height:${h}px;margin-top:${40-h}px"></div></div></div>`}).join('');
-  el.innerHTML=`<div class="week-card" onclick="go('analysis')"><div class="week-ttl">Esta semana</div><div class="week-main">${fmt(weekTotal)}</div><div class="week-sub">en gastos · toca para ver análisis</div><div class="week-days">${bars}</div></div>`;
+  const bars=days.map((d,i)=>{const isTod=i===6;const h=Math.max(4,Math.round(dayAmts[i]/maxAmt*36));return`<div class="week-day${isTod?' week-day-hoy':''}"><div class="week-day-lbl">${esc(DAYS[d.getDay()])}</div><div class="week-day-bar" style="height:40px"><div class="week-day-fill" style="height:${h}px;margin-top:${40-h}px"></div></div></div>`}).join('');
+  el.innerHTML=`<div class="week-card" onclick="go('analysis')"><div class="week-ttl">Esta semana</div><div class="week-main">${esc(fmt(weekTotal))}</div><div class="week-sub">en gastos · toca para ver análisis</div><div class="week-days">${bars}</div></div>`;
 }
 
 // ── ZBB ──
+// Helper compartido: txns del mes ya filtradas por cuenta activa
+function _activeMonthTxns(){
+  const accs=loadAccs();
+  const activeAcc=accs.find(a=>a.id===getActiveAccId())||accs[0];
+  return _accTxns(activeAcc,loadT(cm,cy));
+}
 function renderZbb(){
   const el=$('zbb-home');if(!el)return;
   if(!getCfgBool('zbb')){el.innerHTML='';return}
-  const txns=loadT(cm,cy),ing=sumT(txns,'ing'),zbd=loadZbd();
+  const txns=_activeMonthTxns(),ing=sumT(txns,'ing'),zbd=loadZbd();
   const totalAlloc=Object.values(zbd).reduce((s,v)=>s+v,0);
   const rem=ing-totalAlloc;
   const segs=getCats('gas').slice(0,5).map((c,i)=>{const v=zbd[c.id]||0;const w=ing>0?Math.min(100,v/ing*100):0;return`<div class="zbb-seg" style="width:${w}%;background:${DC[i%DC.length]}"></div>`}).join('');
@@ -1836,7 +1858,7 @@ function renderZbb(){
 }
 
 function openZbb(){
-  const txns=loadT(cm,cy),ing=sumT(txns,'ing');
+  const txns=_activeMonthTxns(),ing=sumT(txns,'ing');
   sv('zbb-ing-lbl',fmt(ing));
   const zbd=loadZbd();
   $('zbb-fields').innerHTML=getCats('gas').map(c=>`<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"><div style="width:36px;font-size:18px">${esc(c.i)}</div><div style="flex:1;font-size:13px;font-weight:600">${esc(c.n)}</div><input type="number" inputmode="decimal" min="0" step="10" value="${escAttr(zbd[c.id]||0)}" class="fi" style="width:100px;text-align:right;padding:8px 12px" id="zbd-${escAttr(safeId(c.id))}"></div>`).join('');
@@ -2588,9 +2610,14 @@ function openAccDetail(id){
               style="padding:6px 10px;background:var(--rl);color:var(--r);border:none;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer">Quitar</button>
           </div>`:!isMe?`<span style="font-size:11px;color:var(--tx3)">—</span>`:''}
         </div>`;
-      }).join(''):`
+      }).join(''):a.syncShared?`
+        <div style="margin:8px 20px;padding:16px;background:var(--acl);border-radius:var(--rsm);border-left:3px solid var(--ac)">
+          <div style="font-size:14px;font-weight:800;color:var(--acd);margin-bottom:6px">⏳ Esperando a que alguien se una</div>
+          <div style="font-size:12px;color:var(--tx2);line-height:1.5">Esta cuenta es <strong>tuya</strong> hasta que invites a alguien. Pulsa <strong>Invitar</strong> arriba para generar un código y compártelo.</div>
+          <div style="font-size:12px;color:var(--tx2);line-height:1.5;margin-top:8px"><strong>Cómo funciona:</strong><br>• Tú generas un código de 12 caracteres<br>• La otra persona instala KASH y lo introduce en Ajustes<br>• A partir de entonces ambos veis los movimientos en tiempo real</div>
+        </div>`:`
         <div style="padding:20px;text-align:center;color:var(--tx3);font-size:13px">
-          Nadie más tiene acceso todavía.<br>Pulsa Invitar para añadir personas.
+          Esta cuenta solo está en este dispositivo.<br>Activa "Compartir" si quieres usarla en otro dispositivo o con otra persona.
         </div>`}
 
       <!-- ZONA PELIGROSA -->
@@ -3440,31 +3467,49 @@ async function _createInvite(accId,role){
 }
 
 async function _claimInvite(token){
-  if(!_sb||!_syncReady||!_authUser){toast('❌ Sin conexión');return null}
-  if(!/^[A-Z0-9]{12}$/.test(token||'')){toast('❌ Código inválido');return null}
+  if(!_sb||!_syncReady||!_authUser){toast('❌ Inicia sesión primero');return null}
+  if(!/^[A-Z0-9]{12}$/.test(token||'')){toast('❌ El código debe tener 12 caracteres');return null}
   try{
-    // 1) Marcar invite como usado
-    const{data:inv,error:e1}=await _sb.from('kash_invites')
+    // 1) Buscar el invite primero (necesita política de SELECT pública para invites válidos)
+    const{data:inv,error:e0}=await _sb.from('kash_invites')
+      .select('*')
+      .eq('token',token)
+      .is('used_at',null)
+      .gt('expires_at',new Date().toISOString())
+      .maybeSingle();
+    if(e0){console.warn('[KASH] invite lookup:',e0.message);toast('❌ Error: '+e0.message);return null}
+    if(!inv){toast('❌ Código no encontrado, ya usado o expirado');return null}
+    // 2) ¿Ya soy miembro de esta cuenta? Si sí, no insertar
+    const{data:existing}=await _sb.from('kash_account_members')
+      .select('user_id').eq('account_id',inv.account_id).eq('user_id',_authUser.id).maybeSingle();
+    if(existing){
+      toast('✅ Ya tienes acceso a esta cuenta');
+      await _pullAllData();
+      return inv;
+    }
+    // 3) Marcar invite como usado por mí
+    const{error:e1}=await _sb.from('kash_invites')
       .update({used_at:new Date().toISOString(),used_by:_authUser.id})
-      .eq('token',token).is('used_at',null).gt('expires_at',new Date().toISOString())
-      .select().maybeSingle();
-    if(e1||!inv){toast('❌ Código inválido o expirado');return null}
-    // 2) Insertar membership (RLS permite si invite válido por RLS de members)
-    // Necesitamos hacerlo via función SQL o que las políticas lo permitan.
-    // Aquí intentamos insert directo:
+      .eq('token',token).is('used_at',null);
+    if(e1){console.warn('[KASH] invite update:',e1.message);toast('❌ No se pudo marcar el código');return null}
+    // 4) Insertar membership
     const{error:e2}=await _sb.from('kash_account_members').insert({
       account_id:inv.account_id,user_id:_authUser.id,role:inv.role,alias:getAlias()||''
     });
     if(e2){
-      // Si las políticas no permiten autoinsert, mostrar error útil
-      console.warn('[KASH] claim membership:',e2.message);
-      toast('⚠️ Pide al admin que te añada manualmente');
+      console.warn('[KASH] claim membership:',e2.code,e2.message);
+      if(e2.code==='42501'||e2.message?.includes('row-level security')){
+        toast('⚠️ Permiso denegado. Aplica MIGRATION_v4.sql en Supabase y vuelve a intentarlo.');
+      }else{
+        toast('⚠️ Error: '+e2.message);
+      }
       return null;
     }
-    // 3) Pull completo para descargar la cuenta nueva y sus txns
+    // 5) Pull completo para descargar la cuenta nueva y sus txns
     await _pullAllData();
+    if(typeof renderAll==='function')renderAll();
     return inv;
-  }catch(e){console.error('[KASH] claimInvite:',e);return null}
+  }catch(e){console.error('[KASH] claimInvite:',e);toast('❌ '+(e.message||'error'));return null}
 }
 
 // ── REMOVE / CHANGE MEMBER ──
@@ -3530,22 +3575,31 @@ function genShareLink(){/* compat - el invite ya se creó en openShareAcc */}
 function shareVia(channel){
   genShareLink();
   const acc=loadAccs().find(a=>a.id===_shareAccId);
-  const code=acc?.syncCode||'——';
+  const code=acc?.syncCode||_currentInviteToken||'——';
   const accNm=acc?.nm||'la cuenta';
   const url=_inviteUrl(code);
-  const roleStr=shareRole==='observer'?'para ver':'para ver y editar';
-  const msg=`Te invito a "${accNm}" en KASH 💸 (${roleStr})\n\nCódigo: *${code}*\n\nO abre directamente:\n${url}`;
+  const roleStr=shareRole==='observer'?'(solo lectura)':'(con edición)';
+  // Mensaje pensado para que el destinatario use el CÓDIGO, no el link.
+  // El link en iOS suele abrir Safari en lugar de la PWA, lo cual rompe el flujo.
+  // Pidiendo que peguen el código directamente en KASH funciona el 100% de las veces.
+  const msg=`Te invito a "${accNm}" en KASH 💸 ${roleStr}\n\n📋 CÓDIGO: ${code}\n\n👉 Cómo unirte:\n1. Abre KASH (instálala desde ${location.origin}${location.pathname} si no la tienes)\n2. Inicia sesión con tu email\n3. Ve a Ajustes → "¿Alguien te ha invitado?" y pega el código\n\nEl código caduca en 7 días.`;
   const enc=encodeURIComponent(msg);
   if(channel==='copy'){
     try{navigator.clipboard.writeText(code).then(()=>toast('📋 Código copiado: '+code))}
     catch{const ta=document.createElement('textarea');ta.value=code;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();toast('📋 '+code)}
     return;
   }
-  if(channel==='native'){if(navigator.share)navigator.share({title:'Acceso a '+accNm,text:msg,url}).catch(()=>{});return}
+  if(channel==='copy_msg'){
+    // Copia el mensaje completo (útil para pegar manualmente)
+    try{navigator.clipboard.writeText(msg).then(()=>toast('📋 Mensaje copiado, pégalo donde quieras'))}
+    catch{const ta=document.createElement('textarea');ta.value=msg;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();toast('📋 Mensaje copiado')}
+    return;
+  }
+  if(channel==='native'){if(navigator.share)navigator.share({title:'Invitación a '+accNm+' en KASH',text:msg}).catch(()=>{});return}
   const urls={
     whatsapp:`https://wa.me/?text=${enc}`,
-    telegram:`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(msg)}`,
-    email:`mailto:?subject=${encodeURIComponent('Acceso a '+accNm+' en KASH')}&body=${enc}`,
+    telegram:`https://t.me/share/url?url=${encodeURIComponent(location.origin+location.pathname)}&text=${encodeURIComponent(msg)}`,
+    email:`mailto:?subject=${encodeURIComponent('Invitación a '+accNm+' en KASH')}&body=${enc}`,
     sms:`sms:?body=${enc}`,
     twitter:`https://twitter.com/intent/tweet?text=${enc}`
   };
@@ -3811,9 +3865,24 @@ function openAdd(){
   const ap=$('add-receipt-preview');if(ap)ap.style.display='none';
   const ab=$('add-receipt-btn');if(ab)ab.style.display='flex';
   buildCatGrid('add-cats',lastType,null);
-  // Account selector
+  // CUENTAS ESTANCAS: el movimiento se añade siempre a la cuenta activa actual.
+  // Mostramos un indicador visible pero NO permitimos cambiarla desde el modal.
+  // Si el usuario quiere meter en otra cuenta, debe cambiar la pestaña antes.
   const accFl=$('add-acc-fl'),accSel=$('add-acc');
-  if(accFl&&accSel){const accs=loadAccs();if(accs.length>1){accFl.style.display='block';accSel.innerHTML=accs.map(a=>`<option value="${escAttr(a.id)}">${esc(a.ic)} ${esc(a.nm)}</option>`).join('');accSel.value=getActiveAccId()}else accFl.style.display='none'}
+  if(accFl&&accSel){
+    const accs=loadAccs();
+    const activeId=getActiveAccId();
+    const activeAcc=accs.find(a=>a.id===activeId)||accs[0];
+    if(accs.length>1){
+      accFl.style.display='block';
+      // Render como label informativo, no como selector
+      accFl.innerHTML=`<div class="fl-lb">Cuenta destino</div><div style="display:flex;align-items:center;gap:10px;padding:13px 14px;background:var(--srf2);border:1.5px solid var(--brd);border-radius:var(--rsm)"><span style="font-size:20px">${esc(activeAcc?.ic||'👤')}</span><span style="font-weight:700;font-size:14px;color:var(--tx1);flex:1">${esc(activeAcc?.nm||'')}</span><span style="font-size:11px;color:var(--tx3)">Cambia de pestaña para mover</span></div>`;
+      // El select oculto sigue ahí para que saveAdd lo lea
+      accFl.innerHTML+=`<select id="add-acc" style="display:none"><option value="${escAttr(activeAcc?.id||'')}" selected></option></select>`;
+    }else{
+      accFl.style.display='none';
+    }
+  }
   $('ov-add')?.classList.add('op');setTimeout(()=>$('add-am')?.focus(),300);
   // Listener de auto-categorización (debounced)
   const nm=$('add-nm');
