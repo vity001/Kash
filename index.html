@@ -170,14 +170,14 @@ input,select,button,textarea{font-family:var(--f)}
 .hero{padding:0;position:relative;overflow:hidden}
 .acc-swiper{position:relative;overflow:visible;min-height:214px;perspective:900px;perspective-origin:50% 38%}
 .acc-slide{position:absolute;left:20px;right:20px;top:0;transform-origin:50% 50%;will-change:transform,opacity;pointer-events:none;transition:transform .45s cubic-bezier(.34,1.4,.64,1),opacity .35s ease}
-.acc-slide.s-active{transform:translateZ(0) scale(1) rotateX(0deg);opacity:1;z-index:3;pointer-events:auto}
+.acc-slide.s-active{transform:translateZ(0) scale(1) rotateX(0deg);opacity:1;z-index:3;pointer-events:auto;position:relative}
 .acc-slide.s-behind{transform:translateZ(-160px) scale(0.82) rotateX(5deg);opacity:.42;z-index:1}
 .acc-slide.s-hidden{transform:translateZ(-300px) scale(0.58) rotateX(10deg);opacity:0;z-index:0}
 .acc-slide.s-exit{animation:accExit .42s cubic-bezier(.55,0,.1,1) forwards;z-index:2;pointer-events:none}
-.acc-slide.s-enter{animation:accEnter .55s cubic-bezier(.34,1.5,.64,1) forwards;z-index:3;pointer-events:auto}
+.acc-slide.s-enter{animation:accEnter .55s cubic-bezier(.34,1.5,.64,1) forwards;z-index:3;pointer-events:auto;position:relative}
 @keyframes accExit{0%{transform:translateZ(0) scale(1) rotateX(0);opacity:1}45%{transform:translateZ(-90px) scale(.86) rotateX(6deg);opacity:.6}100%{transform:translateZ(-300px) scale(.55) rotateX(12deg);opacity:0}}
 @keyframes accEnter{0%{transform:translateZ(-300px) scale(.55) rotateX(12deg);opacity:0}55%{transform:translateZ(22px) scale(1.05) rotateX(-2deg);opacity:1}100%{transform:translateZ(0) scale(1) rotateX(0);opacity:1}}
-.acc-slide-inner{background:var(--srf);border:1.5px solid var(--brd);border-radius:20px;padding:18px 20px 16px;position:relative;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.07)}
+.acc-slide-inner{background:var(--srf);border:1.5px solid var(--brd);border-radius:20px;padding:18px 20px 16px;position:relative;box-shadow:0 8px 32px rgba(0,0,0,.07)}
 body.dark .acc-slide-inner{background:var(--srf2);box-shadow:0 8px 32px rgba(0,0,0,.3)}
 /* Account tab bar */
 .acc-tabs{display:flex;padding:6px 16px 0;gap:6px;overflow-x:auto;scrollbar-width:none;position:relative}
