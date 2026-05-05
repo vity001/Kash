@@ -71,7 +71,7 @@ body.theme-orange{--ac:#ea580c;--acl:#ffedd5;--acd:#9a3412}
 body.theme-rose{--ac:#e11d48;--acl:#ffe4e6;--acd:#9f1239}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none}
 html{height:100%;background:var(--bg)}
-body{height:100%;font-family:var(--f);color:var(--tx);background:var(--bg);max-width:430px;margin:0 auto;display:flex;flex-direction:column;overscroll-behavior:none;box-shadow:0 0 0 100vmax var(--bg)}
+body{height:100%;font-family:var(--f);color:var(--tx);background:var(--bg);max-width:520px;margin:0 auto;display:flex;flex-direction:column;overscroll-behavior:none;box-shadow:0 0 0 100vmax var(--bg)}
 input,select,button,textarea{font-family:var(--f)}
 
 /* SPLASH — concepto línea de gráfico */
@@ -191,15 +191,15 @@ body.dark .acc-slide-inner{background:var(--srf2);box-shadow:0 8px 32px rgba(0,0
 .acc-tab.on .acc-tab-pill{opacity:1}
 /* Net income */
 .acc-neto-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--tx3);margin-bottom:4px}
-.acc-neto{font-size:48px;font-weight:900;letter-spacing:-3px;line-height:1;transition:all .3s}
+.acc-neto{font-size:clamp(32px,11vw,48px);font-weight:900;letter-spacing:-2px;line-height:1.05;transition:all .3s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 .acc-neto.pos{color:#2563eb}.acc-neto.neg{color:var(--r)}.acc-neto.zero{color:var(--tx3)}
 /* Floating stats */
-.acc-stats{display:flex;gap:8px;margin-top:14px}
-.acc-stat{flex:1;padding:10px 10px 8px;border-radius:12px;position:relative;overflow:hidden;cursor:pointer;transition:transform .12s}
+.acc-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:14px}
+.acc-stat{padding:10px 8px 8px;border-radius:12px;position:relative;overflow:hidden;cursor:pointer;transition:transform .12s;min-width:0}
 .acc-stat:active{transform:scale(.96)}
-.acc-stat-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px}
-.acc-stat-val{font-size:15px;font-weight:900;letter-spacing:-.3px}
-.acc-stat-sub{font-size:9px;font-weight:600;margin-top:2px;opacity:.7}
+.acc-stat-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.acc-stat-val{font-size:clamp(12px,3.6vw,15px);font-weight:900;letter-spacing:-.3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.acc-stat-sub{font-size:9px;font-weight:600;margin-top:2px;opacity:.7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .acc-stat.ing{background:#dbeafe;}.acc-stat.ing .acc-stat-lbl{color:#1e40af}.acc-stat.ing .acc-stat-val{color:#1d4ed8}.acc-stat.ing .acc-stat-sub{color:#3b82f6}
 .acc-stat.gas{background:#fee2e2;}.acc-stat.gas .acc-stat-lbl{color:#991b1b}.acc-stat.gas .acc-stat-val{color:#dc2626}.acc-stat.gas .acc-stat-sub{color:#ef4444}
 .acc-stat.inv{background:#fef3c7;}.acc-stat.inv .acc-stat-lbl{color:#92400e}.acc-stat.inv .acc-stat-val{color:#d97706}.acc-stat.inv .acc-stat-sub{color:#f59e0b}
@@ -296,7 +296,7 @@ body.dark .acc-slide-inner{background:var(--srf2)}
 .ftab.on{background:var(--tx);color:#fff;border-color:var(--tx)}
 
 /* NAV */
-.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:var(--srf);border-top:1.5px solid var(--brd);display:flex;align-items:center;padding:6px 0 calc(6px + env(safe-area-inset-bottom,0px));z-index:20}
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:520px;background:var(--srf);border-top:1.5px solid var(--brd);display:flex;align-items:center;padding:6px 0 calc(6px + env(safe-area-inset-bottom,0px));z-index:20}
 .nb{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;border:none;background:none;cursor:pointer;color:var(--tx3);padding:4px 0;transition:color .15s}
 .nb.on{color:var(--ac)}
 .nb-ic{font-size:18px;line-height:1}
@@ -403,7 +403,7 @@ body.dark .acc-slide-inner{background:var(--srf2)}
 /* OVERLAYS */
 .ov{display:none;position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.45);align-items:flex-end;justify-content:center;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
 .ov.op{display:flex}
-.sheet{background:var(--srf);border-radius:24px 24px 0 0;padding:0 0 calc(20px + env(safe-area-inset-bottom,0px));width:100%;max-width:430px;animation:sup .26s cubic-bezier(.32,.72,0,1);max-height:94vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.sheet{background:var(--srf);border-radius:24px 24px 0 0;padding:0 0 calc(20px + env(safe-area-inset-bottom,0px));width:100%;max-width:520px;animation:sup .26s cubic-bezier(.32,.72,0,1);max-height:94vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
 @keyframes sup{from{transform:translateY(100%)}to{transform:translateY(0)}}
 .sh-hnd{width:40px;height:5px;background:var(--brd2);border-radius:3px;margin:12px auto 0}
 .sh-ttl{font-size:18px;font-weight:900;letter-spacing:-.4px;padding:14px 20px;border-bottom:1.5px solid var(--brd)}
@@ -4393,7 +4393,7 @@ function clearAll(){Object.keys(localStorage).filter(k=>k.startsWith('ntx_')||[B
   function mkGhost(dir){
     if(ghost){ghost.remove();ghost=null}
     ghost=document.createElement('div');
-    ghost.style.cssText=`position:fixed;top:0;bottom:0;left:50%;transform:translateX(-50%) translateX(${dir>0?'-100%':'100%'});width:100%;max-width:430px;background:var(--bg);z-index:8;pointer-events:none;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;transition:none`;
+    ghost.style.cssText=`position:fixed;top:0;bottom:0;left:50%;transform:translateX(-50%) translateX(${dir>0?'-100%':'100%'});width:100%;max-width:520px;background:var(--bg);z-index:8;pointer-events:none;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;transition:none`;
     let pm=cm+(dir>0?-1:1),py=cy;if(pm<0){pm=11;py--}else if(pm>11){pm=0;py++}
     ghost.innerHTML=`<div style="font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--tx3);font-weight:700">ir a</div><div style="font-size:26px;font-weight:900;letter-spacing:-.5px;color:var(--tx2)">${MONTHS[pm]}</div>`;
     document.body.appendChild(ghost);
