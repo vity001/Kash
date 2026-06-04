@@ -910,8 +910,12 @@ window.addEventListener('unhandledrejection',e=>{try{console.error('[KASH:rej]',
       <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
       Continuar con Google
     </button>
+    <button onclick="enterLocalMode()"
+      style="width:100%;padding:13px;background:transparent;border:1.5px solid var(--brd);border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;color:var(--tx2);margin-top:10px;transition:all 0.2s ease">
+      🌐 Usar modo local (sin cuenta)
+    </button>
     <div style="text-align:center;margin-top:16px">
-      <span style="font-size:11px;color:var(--tx3)">Tus datos se guardan de forma segura en la nube</span>
+      <span style="font-size:11px;color:var(--tx3)">Tus datos se guardan en la nube (o localmente en tu navegador)</span>
     </div>
   </div>
 </div>
@@ -2695,8 +2699,15 @@ function renderSettings(){
     // Show user email (textContent es seguro frente a XSS)
     const emailEl=$('cfg-user-email');
     if(emailEl){
-      if(_authUser?.email)emailEl.textContent=_authUser.email;
-      else{_sb?.auth?.getUser().then(({data})=>{if(data?.user?.email&&emailEl)emailEl.textContent=data.user.email})}
+      if(_authUser?.email){
+        emailEl.textContent=_authUser.email;
+        const sbEl = emailEl.parentElement.querySelector('.cfg-sb');
+        if(sbEl)sbEl.textContent='Sesión activa';
+      }else{
+        emailEl.textContent='Modo local (sin cuenta)';
+        const sbEl = emailEl.parentElement.querySelector('.cfg-sb');
+        if(sbEl)sbEl.textContent='Datos guardados en este dispositivo';
+      }
     }
     const ntr=$('notif-time-row');if(ntr)ntr.style.display=notifOn?'flex':'none';
     sv('notif-sb',notifOn?`Activo a las ${c.notifTime||'21:00'}`:'Toca para activar');
@@ -4866,23 +4877,27 @@ async function _userPushKey(key,val){
 }
 
 async function _checkAuthSession(){
-  // Wait for Supabase
-  let waited=0;
-  while(!window.supabase&&waited<5000){await new Promise(r=>setTimeout(r,200));waited+=200}
-  if(!window.supabase)return false;
-  if(!_sb)_sb=window.supabase.createClient(_SB_URL,_SB_KEY);
-  // Check for existing session
-  const{data:{session}}=await _sb.auth.getSession();
-  if(session?.user){
-    console.log('[KASH] existing session found:',session.user.email);
-    await _onAuthSuccess(session.user);
-    return true;
-  }
-  // Handle OAuth redirect
-  const{data:{session:oauthSession}}=await _sb.auth.getSession();
-  if(oauthSession?.user){
-    await _onAuthSuccess(oauthSession.user);
-    return true;
+  try {
+    // Wait for Supabase
+    let waited=0;
+    while(!window.supabase&&waited<5000){await new Promise(r=>setTimeout(r,200));waited+=200}
+    if(!window.supabase)return false;
+    if(!_sb)_sb=window.supabase.createClient(_SB_URL,_SB_KEY);
+    // Check for existing session
+    const{data:{session}}=await _sb.auth.getSession();
+    if(session?.user){
+      console.log('[KASH] existing session found:',session.user.email);
+      await _onAuthSuccess(session.user);
+      return true;
+    }
+    // Handle OAuth redirect
+    const{data:{session:oauthSession}}=await _sb.auth.getSession();
+    if(oauthSession?.user){
+      await _onAuthSuccess(oauthSession.user);
+      return true;
+    }
+  } catch(e) {
+    console.warn('[KASH] checkAuthSession error:', e);
   }
   return false;
 }
@@ -4894,6 +4909,28 @@ async function _signOut(){
   localStorage.removeItem('kash_auth_uid');
   // Reload page — cleanest way to show login
   location.reload();
+}
+
+function enterLocalMode(){
+  console.log('[KASH] entering local offline mode');
+  const ls=document.getElementById('login-screen');
+  if(ls){
+    ls.style.cssText='display:none!important;visibility:hidden';
+    ls.setAttribute('hidden','true');
+    ls.className='gone';
+  }
+  _authUser=null;
+  _syncReady=false;
+  _syncUI('off');
+  
+  const c=loadC();
+  if(c.onboarded){
+    renderHome();
+    go('home');
+  }else{
+    const ob=document.getElementById('onboard');
+    if(ob)ob.classList.remove('gone');
+  }
 }
 
 window.addEventListener('load',()=>{
