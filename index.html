@@ -2,28 +2,53 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>KASH & NETO · Control Total & Patrimonio</title>
-  <meta name="description" content="La aplicación de finanzas personales más avanzada: Escáner de tickets OCR, cálculo de Patrimonio Neto y Privacidad Local-First.">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="KASH">
+  <meta name="theme-color" content="#060d1a">
+  <title>KASH · Tu dinero, bajo control total</title>
+  <meta name="description" content="KASH: Control total de finanzas personales, escáner de tickets con OCR y Patrimonio Neto. Privacidad 100% Local.">
+  
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Syne:wght@700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  
   <link rel="stylesheet" href="src/css/styles.css">
   <link rel="stylesheet" href="src/css/components.css">
+
   <!-- Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <!-- Tesseract.js OCR engine for browser-side ticket scanning -->
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+
+  <!-- Auto-generated Apple Touch Icon & Favicon canvas -->
+  <script>
+    (function(){
+      try {
+        const c=document.createElement('canvas');c.width=c.height=192;
+        const g=c.getContext('2d');
+        const r=38;g.beginPath();g.moveTo(r,0);g.lineTo(192-r,0);g.quadraticCurveTo(192,0,192,r);g.lineTo(192,192-r);g.quadraticCurveTo(192,192,192-r,192);g.lineTo(r,192);g.quadraticCurveTo(0,192,0,192-r);g.lineTo(0,r);g.quadraticCurveTo(0,0,r,0);g.closePath();
+        g.fillStyle='#060d1a';g.fill();
+        g.font='700 80px Syne, sans-serif';
+        g.fillStyle='#0d9488';g.textAlign='center';g.textBaseline='middle';
+        g.fillText('K',96,96);
+        const url=c.toDataURL('image/png');
+        const l=document.createElement('link');l.rel='apple-touch-icon';l.href=url;document.head.appendChild(l);
+        const f=document.createElement('link');f.rel='icon';f.href=url;document.head.appendChild(f);
+      } catch(e){}
+    })();
+  </script>
 </head>
 <body class="theme-teal">
 
   <div class="app-container">
 
-    <!-- Desktop Sidebar -->
+    <!-- Desktop Sidebar Navigation -->
     <aside class="sidebar">
       <div class="logo-area">
         <div class="logo-icon">💸</div>
-        <div class="logo-text">KASH & NETO</div>
+        <div class="logo-text">KASH</div>
       </div>
 
       <ul class="nav-list">
@@ -72,9 +97,9 @@
       <!-- Top Action Bar -->
       <header class="header-bar">
         <div>
-          <h1 id="page-title">Tu Dinero bajo Control Total</h1>
+          <h1 id="page-title">Tu dinero, bajo control total</h1>
           <div class="flex-center gap-3 mt-1">
-            <span id="streak-counter" class="streak-badge">🔥 3 días seguidos</span>
+            <span id="streak-counter" class="streak-badge">🔥 0 días seguidos</span>
             <span class="text-secondary text-xs">• Privacidad 100% Local</span>
           </div>
         </div>
@@ -104,19 +129,19 @@
         <div class="grid-3">
           <div class="card card-stat">
             <span class="stat-label">Patrimonio Neto</span>
-            <span class="stat-value text-success" id="card-net-worth">0.00 €</span>
+            <span class="stat-value text-success" id="card-net-worth">0,00 €</span>
             <span class="text-xs text-muted">Activos - Pasivos totales</span>
           </div>
 
           <div class="card card-stat">
             <span class="stat-label">Activos Totales</span>
-            <span class="stat-value" id="card-assets">0.00 €</span>
+            <span class="stat-value" id="card-assets">0,00 €</span>
             <span class="text-xs text-muted">Ahorros, inversiones e inmuebles</span>
           </div>
 
           <div class="card card-stat">
             <span class="stat-label">Pasivos (Deudas)</span>
-            <span class="stat-value text-danger" id="card-liabilities">0.00 €</span>
+            <span class="stat-value text-danger" id="card-liabilities">0,00 €</span>
             <span class="text-xs text-muted">Préstamos y tarjetas</span>
           </div>
         </div>
@@ -125,15 +150,15 @@
         <div class="grid-3">
           <div class="card card-stat">
             <span class="stat-label">Ingresos este mes</span>
-            <span class="stat-value text-success" id="card-income">+0.00 €</span>
+            <span class="stat-value text-success" id="card-income">+0,00 €</span>
           </div>
           <div class="card card-stat">
             <span class="stat-label">Gastos este mes</span>
-            <span class="stat-value text-danger" id="card-expense">-0.00 €</span>
+            <span class="stat-value text-danger" id="card-expense">-0,00 €</span>
           </div>
           <div class="card card-stat">
             <span class="stat-label">Capacidad de Ahorro</span>
-            <span class="stat-value" id="card-savings">0.00 € (0%)</span>
+            <span class="stat-value" id="card-savings">0,00 € (0%)</span>
           </div>
         </div>
 
@@ -242,7 +267,7 @@
 
         <div class="grid-2">
           <div class="card">
-            <h3 class="font-bold mb-3">Tema Visual de la Aplicación</h3>
+            <h3 class="font-bold mb-3">Tema Visual de KASH</h3>
             <p class="text-xs text-secondary mb-3">Selecciona el esquema de color que prefieras:</p>
             <div class="theme-picker-grid">
               <button class="theme-pick-btn active" data-theme="teal" style="background: #0d9488;" title="Teal Kash"></button>
@@ -287,7 +312,7 @@
 
     </main>
 
-    <!-- Mobile Bottom Navigation Bar -->
+    <!-- Mobile Bottom Navigation Bar (Optimized for iOS & Android) -->
     <nav class="mobile-nav">
       <button class="mobile-tab active" data-view="dashboard">
         <span class="mobile-tab-icon">📊</span>
@@ -323,13 +348,13 @@
 
       <div class="ocr-dropzone" id="ocr-dropzone">
         <span class="ocr-icon-lg">📸</span>
-        <p class="font-bold mb-1">Toma una foto o selecciona la imagen del ticket</p>
-        <p class="text-xs text-muted">Formatos JPG, PNG, WEBP. Reconocimiento automático de total y comercio.</p>
-        <input type="file" id="ocr-file-input" accept="image/*" style="display: none;">
+        <p class="font-bold mb-1">Toma una foto con la cámara o elige una imagen</p>
+        <p class="text-xs text-muted">Extrae automáticamente importe, comercio y categoría.</p>
+        <input type="file" id="ocr-file-input" accept="image/*" capture="environment" style="display: none;">
       </div>
 
       <div id="ocr-preview-container" class="mt-3 text-center" style="display: none;">
-        <img id="ocr-preview-img" style="max-height: 180px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+        <img id="ocr-preview-img" style="max-height: 180px; border-radius: var(--radius-md); border: 1px solid var(--border-color);" alt="Vista previa ticket">
       </div>
 
       <div id="ocr-status" class="mt-3 text-center text-sm font-bold text-secondary" style="display: none;"></div>
@@ -373,7 +398,7 @@
 
         <div class="form-group">
           <label>Concepto / Nota (Comercio)</label>
-          <input type="text" id="tx-note" class="form-control" placeholder="Ej. Compra semanal Mercadona...">
+          <input type="text" id="tx-note" class="form-control" placeholder="Ej. Mercadona, Repsol, Alquiler...">
         </div>
 
         <div class="form-group">
@@ -400,7 +425,7 @@
         <div class="form-group">
           <label class="checkbox-label text-danger">
             <input type="checkbox" id="asset-is-liability">
-            Es una deuda / pasivo (Marcar si es préstamo o tarjeta)
+            Es una deuda / pasivo (Préstamo o tarjeta)
           </label>
         </div>
 
@@ -411,7 +436,7 @@
 
         <div class="form-group">
           <label>Categoría</label>
-          <input type="text" id="asset-category" class="form-control" placeholder="Ej. Banco, Inversiones, Inmueble..." required>
+          <input type="text" id="asset-category" class="form-control" placeholder="Ej. Banco, Inversiones, Deuda..." required>
         </div>
 
         <div class="form-group">
@@ -479,14 +504,14 @@
         <h3 class="font-bold">📄 Ticket de Compra</h3>
         <button class="btn-icon modal-close">❌</button>
       </div>
-      <img id="view-image-content" style="max-width: 100%; max-height: 450px; border-radius: var(--radius-md);">
+      <img id="view-image-content" style="max-width: 100%; max-height: 450px; border-radius: var(--radius-md);" alt="Ticket adjunto">
     </div>
   </div>
 
   <!-- Toast Container -->
   <div id="toast-notification" class="toast">Mensaje de notificación</div>
 
-  <!-- Bootstrap JS -->
+  <!-- App Bootstrap JS -->
   <script type="module" src="src/js/app.js"></script>
 </body>
 </html>

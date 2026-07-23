@@ -1,69 +1,42 @@
 /**
- * Store - Gestor de estado unificado para KASH & NETO Ultimate
+ * Store - Gestor de estado unificado para KASH
  */
 
-const STORAGE_KEY = 'kash_neto_ultimate_v2';
+const STORAGE_KEY = 'kash_app_data_v3';
 
 const DEFAULT_CATEGORIES = [
   { id: 'cat_food', name: 'Alimentación / Super', icon: '🛒', color: '#10b981', type: 'expense' },
   { id: 'cat_housing', name: 'Vivienda y Alquiler', icon: '🏠', color: '#6366f1', type: 'expense' },
   { id: 'cat_transport', name: 'Transporte y Coche', icon: '🚗', color: '#f59e0b', type: 'expense' },
-  { id: 'cat_leisure', name: 'Ocio, Restauración y Compras', icon: '🍔', color: '#ec4899', type: 'expense' },
-  { id: 'cat_services', name: 'Servicios, Luz e Internet', icon: '💡', color: '#06b6d4', type: 'expense' },
+  { id: 'cat_leisure', name: 'Ocio y Restauración', icon: '🍔', color: '#ec4899', type: 'expense' },
+  { id: 'cat_services', name: 'Servicios y Luz', icon: '💡', color: '#06b6d4', type: 'expense' },
   { id: 'cat_health', name: 'Salud y Cuidados', icon: '🩺', color: '#ef4444', type: 'expense' },
   { id: 'cat_salary', name: 'Nómina / Sueldo', icon: '💼', color: '#10b981', type: 'income' },
   { id: 'cat_invest_return', name: 'Rendimientos e Inversiones', icon: '📈', color: '#8b5cf6', type: 'income' },
   { id: 'cat_freelance', name: 'Freelance / Ventas', icon: '💻', color: '#3b82f6', type: 'income' }
 ];
 
+// Estado inicial limpio (Completamente a cero)
 const INITIAL_DATA = {
   settings: {
     currency: 'EUR',
     currencySymbol: '€',
-    theme: 'teal', // 'teal' | 'purple' | 'blue' | 'rose' | 'orange'
-    streakDays: 3,
-    lastLoggedDate: new Date().toISOString().split('T')[0]
+    theme: 'teal',
+    streakDays: 0,
+    lastLoggedDate: ''
   },
   categories: DEFAULT_CATEGORIES,
-  transactions: [
-    { id: 'tx_1', date: '2026-07-20', type: 'income', categoryId: 'cat_salary', amount: 2800, note: 'Nómina mensual' },
-    { id: 'tx_2', date: '2026-07-21', type: 'expense', categoryId: 'cat_housing', amount: 850, note: 'Alquiler vivienda' },
-    { id: 'tx_3', date: '2026-07-22', type: 'expense', categoryId: 'cat_food', amount: 145.50, note: 'Compra semanal Mercadona', receiptImage: null },
-    { id: 'tx_4', date: '2026-07-22', type: 'expense', categoryId: 'cat_services', amount: 62.30, note: 'Factura Luz Iberdrola' },
-    { id: 'tx_5', date: '2026-07-23', type: 'income', categoryId: 'cat_invest_return', amount: 120, note: 'Dividendos Fondos Indexados' }
-  ],
-  assets: [
-    { id: 'ast_1', name: 'Cuenta Corriente', category: 'Banco', amount: 4800, icon: '🏦' },
-    { id: 'ast_2', name: 'Fondo Indexado S&P500', category: 'Inversiones', amount: 18500, icon: '📈' },
-    { id: 'ast_3', name: 'Criptomonedas (BTC/ETH)', category: 'Cripto', amount: 3200, icon: '₿' },
-    { id: 'ast_4', name: 'Fondo de Emergencia', category: 'Ahorro', amount: 6000, icon: '🛡️' }
-  ],
-  liabilities: [
-    { id: 'lia_1', name: 'Tarjeta de Crédito', category: 'Deuda', amount: 350, icon: '💳' },
-    { id: 'lia_2', name: 'Préstamo Coche', category: 'Préstamo', amount: 5200, icon: '🚘' }
-  ],
-  budgets: [
-    { categoryId: 'cat_food', limit: 350 },
-    { categoryId: 'cat_leisure', limit: 200 },
-    { categoryId: 'cat_transport', limit: 150 }
-  ],
-  goals: [
-    { id: 'g_1', name: 'Fondo de Emergencia 6 Meses', icon: '🛡️', target: 10000, saved: 6000 },
-    { id: 'g_2', name: 'Vacaciones de Verano', icon: '✈️', target: 2000, saved: 1400 },
-    { id: 'g_3', name: 'Entrada Coche Nuevo', icon: '🚗', target: 5000, saved: 2100 }
-  ],
+  transactions: [],
+  assets: [],
+  liabilities: [],
+  budgets: [],
+  goals: [],
   templates: [
-    { id: 'tmpl_1', name: 'Café Diario', icon: '☕', categoryId: 'cat_leisure', type: 'expense', amount: 1.80 },
-    { id: 'tmpl_2', name: 'Supermercado', icon: '🛒', categoryId: 'cat_food', type: 'expense', amount: 45.00 },
-    { id: 'tmpl_3', name: 'Gasolina', icon: '⛽', categoryId: 'cat_transport', type: 'expense', amount: 50.00 }
+    { id: 'tmpl_1', name: 'Supermercado', icon: '🛒', categoryId: 'cat_food', type: 'expense', amount: 30.00 },
+    { id: 'tmpl_2', name: 'Gasolina', icon: '⛽', categoryId: 'cat_transport', type: 'expense', amount: 50.00 },
+    { id: 'tmpl_3', name: 'Café', icon: '☕', categoryId: 'cat_leisure', type: 'expense', amount: 2.00 }
   ],
-  netWorthHistory: [
-    { month: 'Mar 2026', assets: 28000, liabilities: 6500, netWorth: 21500 },
-    { month: 'Abr 2026', assets: 29200, liabilities: 6300, netWorth: 22900 },
-    { month: 'May 2026', assets: 30500, liabilities: 6100, netWorth: 24400 },
-    { month: 'Jun 2026', assets: 31100, liabilities: 5900, netWorth: 25200 },
-    { month: 'Jul 2026', assets: 32500, liabilities: 5550, netWorth: 26950 }
-  ]
+  netWorthHistory: []
 };
 
 class Store {
@@ -109,12 +82,14 @@ class Store {
     };
     this.data.transactions.unshift(newTx);
     this.updateStreak();
+    this.updateNetWorthHistory();
     this.save();
     return newTx;
   }
 
   deleteTransaction(id) {
     this.data.transactions = this.data.transactions.filter(t => t.id !== id);
+    this.updateNetWorthHistory();
     this.save();
   }
 
@@ -123,11 +98,13 @@ class Store {
   addAsset(asset) {
     const newAsset = { id: 'ast_' + Date.now(), name: asset.name, category: asset.category || 'Otros', amount: parseFloat(asset.amount), icon: asset.icon || '💰' };
     this.data.assets.push(newAsset);
+    this.updateNetWorthHistory();
     this.save();
     return newAsset;
   }
   deleteAsset(id) {
     this.data.assets = this.data.assets.filter(a => a.id !== id);
+    this.updateNetWorthHistory();
     this.save();
   }
 
@@ -135,11 +112,13 @@ class Store {
   addLiability(liability) {
     const newLia = { id: 'lia_' + Date.now(), name: liability.name, category: liability.category || 'Otros', amount: parseFloat(liability.amount), icon: liability.icon || '💳' };
     this.data.liabilities.push(newLia);
+    this.updateNetWorthHistory();
     this.save();
     return newLia;
   }
   deleteLiability(id) {
     this.data.liabilities = this.data.liabilities.filter(l => l.id !== id);
+    this.updateNetWorthHistory();
     this.save();
   }
 
@@ -152,6 +131,25 @@ class Store {
   }
   getNetWorth() {
     return this.getTotalAssets() - this.getTotalLiabilities();
+  }
+
+  updateNetWorthHistory() {
+    const now = new Date();
+    const monthsNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+    const monthLabel = `${monthsNames[now.getMonth()]} ${now.getFullYear()}`;
+
+    const currentNet = this.getNetWorth();
+    const currentAssets = this.getTotalAssets();
+    const currentLiabilities = this.getTotalLiabilities();
+
+    if (!this.data.netWorthHistory) this.data.netWorthHistory = [];
+
+    const existingIdx = this.data.netWorthHistory.findIndex(h => h.month === monthLabel);
+    if (existingIdx >= 0) {
+      this.data.netWorthHistory[existingIdx] = { month: monthLabel, assets: currentAssets, liabilities: currentLiabilities, netWorth: currentNet };
+    } else {
+      this.data.netWorthHistory.push({ month: monthLabel, assets: currentAssets, liabilities: currentLiabilities, netWorth: currentNet });
+    }
   }
 
   getMonthlySummary() {
@@ -175,9 +173,7 @@ class Store {
   }
 
   // Budgets
-  getBudgets() {
-    return this.data.budgets || [];
-  }
+  getBudgets() { return this.data.budgets || []; }
   saveBudget(catId, limit) {
     if (!this.data.budgets) this.data.budgets = [];
     const idx = this.data.budgets.findIndex(b => b.categoryId === catId);
@@ -262,6 +258,7 @@ class Store {
   }
 
   resetAllData() {
+    localStorage.removeItem(STORAGE_KEY);
     this.data = JSON.parse(JSON.stringify(INITIAL_DATA));
     this.save();
   }

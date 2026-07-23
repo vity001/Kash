@@ -1,5 +1,5 @@
 /**
- * Export - Gestor de Exportación, Importación e Informes PDF
+ * Export - Gestor de Exportación, Importación e Informes en KASH
  */
 
 import { store } from './store.js';
@@ -10,7 +10,7 @@ export function exportToJSON() {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `kash_neto_backup_${new Date().toISOString().split('T')[0]}.json`;
+  a.download = `kash_backup_${new Date().toISOString().split('T')[0]}.json`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
@@ -20,7 +20,7 @@ export function exportToJSON() {
 export function exportToCSV() {
   const transactions = store.getTransactions();
   if (!transactions || transactions.length === 0) {
-    alert('No hay movimientos registrados.');
+    alert('No hay movimientos registrados para exportar.');
     return;
   }
 
@@ -37,7 +37,7 @@ export function exportToCSV() {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `kash_neto_movimientos_${new Date().toISOString().split('T')[0]}.csv`;
+  a.download = `kash_movimientos_${new Date().toISOString().split('T')[0]}.csv`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);

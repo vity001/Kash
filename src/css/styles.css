@@ -1,9 +1,9 @@
 /* ==========================================================================
-   KASH & NETO Ultimate - Design System & Themes
+   KASH - Design System, Mobile-First PWA Insets & Color Themes
    ========================================================================== */
 
 :root {
-  /* Default Theme: Teal (Kash signature) */
+  /* Default Theme: Teal (Kash Signature) */
   --bg-main: #060d1a;
   --bg-surface: #111827;
   --bg-card: rgba(17, 24, 39, 0.7);
@@ -19,7 +19,7 @@
 
   --accent-primary: #0d9488;
   --accent-primary-hover: #0f5c54;
-  --accent-glow: rgba(13, 148, 136, 0.3);
+  --accent-glow: rgba(13, 148, 136, 0.35);
 
   --color-success: #10b981;
   --color-danger: #f43f5e;
@@ -35,7 +35,7 @@
   --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.4);
   --shadow-lg: 0 16px 36px rgba(0, 0, 0, 0.6);
 
-  --glass-bg: rgba(17, 24, 39, 0.7);
+  --glass-bg: rgba(17, 24, 39, 0.75);
   --glass-border: rgba(255, 255, 255, 0.1);
   --backdrop-blur: blur(16px);
 
@@ -83,6 +83,7 @@ body {
   min-height: 100vh;
   display: flex;
   overflow-x: hidden;
+  overscroll-behavior-y: none;
 }
 
 /* Typography & Utils */
@@ -111,6 +112,10 @@ h1, h2, h3, h4 { font-family: var(--font-brand); font-weight: 800; letter-spacin
 .mb-1 { margin-bottom: 0.25rem; }
 .mb-3 { margin-bottom: 0.75rem; }
 .mb-4 { margin-bottom: 1rem; }
+.mt-1 { margin-top: 0.25rem; }
+.mt-2 { margin-top: 0.5rem; }
+.mt-3 { margin-top: 0.75rem; }
+.mt-4 { margin-top: 1rem; }
 
 /* Layout Structure */
 .app-container {
@@ -155,9 +160,10 @@ h1, h2, h3, h4 { font-family: var(--font-brand); font-weight: 800; letter-spacin
 
 .logo-text {
   font-family: var(--font-brand);
-  font-size: 1.4rem;
+  font-size: 1.5rem;
   font-weight: 800;
   color: #ffffff;
+  letter-spacing: -0.5px;
 }
 
 .nav-list {
@@ -200,7 +206,7 @@ h1, h2, h3, h4 { font-family: var(--font-brand); font-weight: 800; letter-spacin
   flex: 1;
   padding: 2rem;
   max-width: 1400px;
-  padding-bottom: 100px;
+  padding-bottom: calc(100px + env(safe-area-inset-bottom));
 }
 
 .header-bar {
@@ -214,13 +220,13 @@ h1, h2, h3, h4 { font-family: var(--font-brand); font-weight: 800; letter-spacin
 .streak-badge {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.4rem 0.85rem;
+  gap: 0.4rem;
+  padding: 0.35rem 0.85rem;
   background: rgba(234, 88, 12, 0.15);
   border: 1px solid rgba(234, 88, 12, 0.4);
   color: #fb923c;
   border-radius: var(--radius-full);
-  font-size: 0.85rem;
+  font-size: 0.825rem;
   font-weight: 700;
 }
 
@@ -265,24 +271,22 @@ h1, h2, h3, h4 { font-family: var(--font-brand); font-weight: 800; letter-spacin
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  padding: 0.65rem 1.25rem;
+  padding: 0.7rem 1.25rem;
   border-radius: var(--radius-md);
   font-weight: 700;
   font-size: 0.9rem;
   cursor: pointer;
   border: none;
   transition: all 0.2s ease;
+  user-select: none;
 }
+
+.btn:active { transform: scale(0.96); }
 
 .btn-primary {
   background: linear-gradient(135deg, var(--accent-primary), var(--accent-primary-hover));
   color: white;
   box-shadow: 0 4px 14px var(--accent-glow);
-}
-
-.btn-primary:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 20px var(--accent-glow);
 }
 
 .btn-scan {
@@ -297,10 +301,6 @@ h1, h2, h3, h4 { font-family: var(--font-brand); font-weight: 800; letter-spacin
   border: 1px solid var(--border-color);
 }
 
-.btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.1);
-}
-
 .btn-danger {
   background: rgba(244, 63, 94, 0.15);
   color: var(--color-danger);
@@ -313,25 +313,18 @@ h1, h2, h3, h4 { font-family: var(--font-brand); font-weight: 800; letter-spacin
   cursor: pointer;
   border-radius: var(--radius-sm);
   padding: 0.4rem;
-  transition: background 0.2s ease;
   color: var(--text-secondary);
-}
-
-.btn-icon:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: var(--text-primary);
 }
 
 .form-control {
   width: 100%;
-  padding: 0.75rem 1rem;
+  padding: 0.8rem 1rem;
   background: var(--bg-input);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
   color: var(--text-primary);
   font-size: 0.95rem;
   outline: none;
-  transition: border-color 0.2s ease;
 }
 
 .form-control:focus {
@@ -343,7 +336,7 @@ h1, h2, h3, h4 { font-family: var(--font-brand); font-weight: 800; letter-spacin
 .modal-overlay {
   position: fixed;
   top: 0; left: 0; width: 100vw; height: 100vh;
-  background: rgba(0, 0, 0, 0.8);
+  background: rgba(0, 0, 0, 0.82);
   backdrop-filter: blur(10px);
   display: flex; align-items: center; justify-content: center;
   z-index: 100; opacity: 0; pointer-events: none;
@@ -361,19 +354,21 @@ h1, h2, h3, h4 { font-family: var(--font-brand); font-weight: 800; letter-spacin
   box-shadow: var(--shadow-lg);
   transform: translateY(20px);
   transition: transform 0.25s ease;
+  max-height: 90vh;
+  overflow-y: auto;
 }
 
 .modal-overlay.active .modal-content { transform: translateY(0); }
 
-/* Mobile Bottom Nav Bar */
+/* Mobile Bottom Nav Bar (iOS Safe Area Padding) */
 .mobile-nav {
   display: none;
   position: fixed;
   bottom: 0; left: 0; width: 100vw;
-  background: rgba(17, 24, 39, 0.92);
-  backdrop-filter: blur(16px);
+  background: rgba(11, 15, 25, 0.94);
+  backdrop-filter: blur(20px);
   border-top: 1px solid var(--border-color);
-  padding: 0.5rem 0.25rem;
+  padding: 0.6rem 0.25rem calc(0.6rem + env(safe-area-inset-bottom));
   justify-content: space-around;
   z-index: 90;
 }
@@ -386,17 +381,19 @@ h1, h2, h3, h4 { font-family: var(--font-brand); font-weight: 800; letter-spacin
   background: transparent;
   border: none;
   color: var(--text-muted);
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   font-weight: 600;
   cursor: pointer;
+  transition: color 0.15s ease;
 }
 
 .mobile-tab.active {
   color: var(--accent-primary);
+  font-weight: 800;
 }
 
 .mobile-tab-icon {
-  font-size: 1.25rem;
+  font-size: 1.3rem;
 }
 
 /* Toast */
@@ -416,6 +413,9 @@ h1, h2, h3, h4 { font-family: var(--font-brand); font-weight: 800; letter-spacin
 
 @media (max-width: 850px) {
   .sidebar { display: none; }
-  .main-content { margin-left: 0; padding: 1rem; }
+  .main-content { margin-left: 0; padding: 1rem; padding-bottom: calc(90px + env(safe-area-inset-bottom)); }
   .mobile-nav { display: flex; }
+  .header-bar { flex-direction: column; align-items: flex-start; gap: 1rem; }
+  .header-bar > div:last-child { width: 100%; display: flex; gap: 0.5rem; }
+  .header-bar button { flex: 1; justify-content: center; font-size: 0.825rem; }
 }
