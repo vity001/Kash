@@ -1,0 +1,146 @@
+/* ==========================================================================
+   KASH & NETO - Components Styles (OCR Dropzone, Themes, Progress Bars)
+   ========================================================================== */
+
+.view-section { display: none; animation: fadeIn 0.3s ease; }
+.view-section.active { display: block; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem; margin-bottom: 1.25rem; }
+.grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 1.25rem; margin-bottom: 1.25rem; }
+
+/* Charts */
+.chart-card { height: 340px; position: relative; }
+.chart-wrapper { position: relative; height: 250px; width: 100%; }
+
+/* OCR Scanner Component */
+.ocr-dropzone {
+  border: 2px dashed var(--accent-primary);
+  background: rgba(13, 148, 136, 0.05);
+  border-radius: var(--radius-md);
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ocr-dropzone:hover {
+  background: rgba(13, 148, 136, 0.12);
+  border-color: #38bdf8;
+}
+
+.ocr-icon-lg {
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.progress-bar-bg {
+  width: 100%;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  margin-top: 0.4rem;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: var(--accent-primary);
+  border-radius: var(--radius-full);
+  transition: width 0.4s ease;
+}
+
+.progress-bar-fill.danger { background: var(--color-danger); }
+.progress-bar-fill.success { background: var(--color-success); }
+
+/* Quick Templates Row */
+.tmpl-row {
+  display: flex;
+  gap: 0.75rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+  scrollbar-width: none;
+}
+
+.tmpl-row::-webkit-scrollbar { display: none; }
+
+.tmpl-btn {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  background: var(--bg-surface);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 80px;
+}
+
+.tmpl-btn:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent-primary);
+  box-shadow: 0 4px 12px var(--accent-glow);
+}
+
+.tmpl-ic { font-size: 1.5rem; }
+.tmpl-nm { font-size: 0.75rem; font-weight: 700; color: var(--text-secondary); }
+.tmpl-am { font-size: 0.75rem; font-weight: 800; color: var(--accent-primary); }
+
+/* Theme Pickers */
+.theme-picker-grid {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.theme-pick-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.theme-pick-btn:hover { transform: scale(1.1); }
+.theme-pick-btn.active { border-color: #ffffff; transform: scale(1.15); }
+
+/* Tables */
+.table-responsive { width: 100%; overflow-x: auto; }
+.data-table { width: 100%; border-collapse: collapse; text-align: left; }
+.data-table th { padding: 1rem; background: rgba(255, 255, 255, 0.02); color: var(--text-secondary); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border-color); }
+.data-table td { padding: 1rem; border-bottom: 1px solid var(--border-color); font-size: 0.95rem; }
+.data-table tbody tr:hover { background: rgba(255, 255, 255, 0.03); }
+
+/* Category Badges */
+.category-badge {
+  display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.3rem 0.75rem; border-radius: var(--radius-full); font-size: 0.825rem; font-weight: 600;
+}
+
+/* Items List */
+.item-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 0.85rem 1rem;
+  margin-bottom: 0.75rem;
+  transition: background 0.2s ease;
+}
+
+.item-card:hover { background: rgba(255, 255, 255, 0.05); }
+
+.item-icon {
+  width: 36px; height: 36px; border-radius: var(--radius-sm); background: rgba(255, 255, 255, 0.06); display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
+}
+
+.form-group { margin-bottom: 1.25rem; }
+.form-group label { display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.4rem; }
+.checkbox-label { display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.9rem; }

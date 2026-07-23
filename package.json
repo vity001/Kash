@@ -1,0 +1,20 @@
+{
+  "name": "neto-finance-app",
+  "version": "1.0.0",
+  "description": "Aplicación web de finanzas personales, gestión de gastos y patrimonio neto orientada a la privacidad.",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx serve .",
+    "dev": "npx serve ."
+  },
+  "keywords": [
+    "finanzas",
+    "net-worth",
+    "gastos",
+    "presupuesto",
+    "privacy-first",
+    "local-first"
+  ],
+  "author": "",
+  "license": "MIT"
+}
