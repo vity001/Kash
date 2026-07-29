@@ -1,5 +1,5 @@
 /* ==========================================================================
-   KASH & NETO - Components Styles (OCR Dropzone, Themes, Progress Bars)
+   KASH - Components Styles (Bank Grid, Cards, Progress Bars, OCR Dropzone)
    ========================================================================== */
 
 .view-section { display: none; animation: fadeIn 0.3s ease; }
@@ -12,6 +12,36 @@
 
 .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem; margin-bottom: 1.25rem; }
 .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 1.25rem; margin-bottom: 1.25rem; }
+
+/* Bank Selection Grid inside Modal */
+.bank-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 0.85rem;
+  margin-top: 1rem;
+}
+
+.bank-card-pick {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 1rem 0.75rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.bank-card-pick:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--accent-primary);
+  transform: translateY(-2px);
+}
+
+.bank-icon-lg {
+  font-size: 2.2rem;
+  display: block;
+  margin-bottom: 0.4rem;
+}
 
 /* Charts */
 .chart-card { height: 340px; position: relative; }

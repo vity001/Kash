@@ -19,10 +19,10 @@
 
   <!-- Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- Tesseract.js OCR engine for browser-side ticket scanning -->
+  <!-- Tesseract.js OCR engine -->
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
-  <!-- Auto-generated Apple Touch Icon & Favicon canvas -->
+  <!-- Favicon canvas generator -->
   <script>
     (function(){
       try {
@@ -67,7 +67,7 @@
         <li>
           <button class="nav-btn" data-view="networth">
             <span class="nav-icon">🏦</span>
-            <span>Patrimonio Neto</span>
+            <span>Patrimonio & Bancos</span>
           </button>
         </li>
         <li>
@@ -105,11 +105,14 @@
         </div>
 
         <div class="flex-center gap-3">
+          <button class="btn btn-secondary" id="btn-open-bank-modal">
+            <span>🏛️</span> Bancos
+          </button>
           <button class="btn btn-scan" id="btn-open-ocr-modal">
-            <span>📷</span> Escanear Ticket (OCR)
+            <span>📷</span> Ticket (OCR)
           </button>
           <button class="btn btn-primary" id="btn-open-tx-modal">
-            <span>+</span> Nuevo Movimiento
+            <span>+</span> Nuevo
           </button>
         </div>
       </header>
@@ -120,9 +123,7 @@
         <!-- Quick 1-Tap Templates -->
         <div class="mb-4">
           <h4 class="text-xs text-muted font-bold uppercase mb-2">Plantillas Rápida (1-Tap)</h4>
-          <div id="quick-templates-row" class="tmpl-row">
-            <!-- Inserted by JS -->
-          </div>
+          <div id="quick-templates-row" class="tmpl-row"></div>
         </div>
 
         <!-- Summary Cards -->
@@ -136,7 +137,7 @@
           <div class="card card-stat">
             <span class="stat-label">Activos Totales</span>
             <span class="stat-value" id="card-assets">0,00 €</span>
-            <span class="text-xs text-muted">Ahorros, inversiones e inmuebles</span>
+            <span class="text-xs text-muted">Bancos, inversiones y cuentas</span>
           </div>
 
           <div class="card card-stat">
@@ -184,7 +185,7 @@
       <section id="view-transactions" class="view-section">
         <div class="card p-4 mb-4 flex-between gap-3">
           <div class="flex-center gap-3">
-            <input type="text" id="filter-search" class="form-control" placeholder="🔍 Buscar por concepto, tienda o nota..." style="width: 300px;">
+            <input type="text" id="filter-search" class="form-control" placeholder="🔍 Buscar por concepto, banco o nota..." style="width: 300px;">
             <select id="filter-type" class="form-control" style="width: 160px;">
               <option value="all">Todos los movimientos</option>
               <option value="expense">Solo Gastos</option>
@@ -206,19 +207,26 @@
                   <th class="text-right">Acción</th>
                 </tr>
               </thead>
-              <tbody id="transactions-table-body">
-                <!-- Inserted by JS -->
-              </tbody>
+              <tbody id="transactions-table-body"></tbody>
             </table>
           </div>
         </div>
       </section>
 
-      <!-- 3. NET WORTH VIEW -->
+      <!-- 3. NET WORTH & BANKS VIEW -->
       <section id="view-networth" class="view-section">
         <div class="flex-between mb-4">
-          <h2>Patrimonio Neto (Activos & Pasivos)</h2>
-          <button class="btn btn-primary" id="btn-open-asset-modal">+ Añadir Elemento</button>
+          <h2>Patrimonio & Cuentas Bancarias</h2>
+          <div class="flex-center gap-2">
+            <button class="btn btn-secondary" id="btn-sync-banks-header">🔄 Sincronizar Bancos</button>
+            <button class="btn btn-primary" id="btn-open-asset-modal">+ Elemento Manual</button>
+          </div>
+        </div>
+
+        <!-- Connected Banks Section -->
+        <div class="mb-4">
+          <h3 class="font-bold text-secondary text-sm uppercase mb-2">🏛️ Cuentas Bancarias Conectadas</h3>
+          <div id="connected-banks-list"></div>
         </div>
 
         <div class="grid-2">
@@ -312,7 +320,7 @@
 
     </main>
 
-    <!-- Mobile Bottom Navigation Bar (Optimized for iOS & Android) -->
+    <!-- Mobile Bottom Navigation Bar -->
     <nav class="mobile-nav">
       <button class="mobile-tab active" data-view="dashboard">
         <span class="mobile-tab-icon">📊</span>
@@ -336,6 +344,20 @@
       </button>
     </nav>
 
+  </div>
+
+  <!-- MODAL: CONNECT BANK -->
+  <div class="modal-overlay" id="modal-bank">
+    <div class="modal-content">
+      <div class="flex-between mb-3">
+        <h3 class="font-bold">🏛️ Conectar Cuentas Bancarias</h3>
+        <button class="btn-icon modal-close">❌</button>
+      </div>
+
+      <p class="text-xs text-secondary mb-3">Selecciona tu entidad para sincronizar movimientos y saldos automáticamente:</p>
+
+      <div id="bank-selection-grid" class="bank-grid"></div>
+    </div>
   </div>
 
   <!-- MODAL: OCR TICKET SCANNER -->

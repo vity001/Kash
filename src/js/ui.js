@@ -1,11 +1,12 @@
 /**
- * UI - Controlador de Interfaz de Usuario para KASH & NETO Ultimate
+ * UI - Controlador de Interfaz de Usuario para KASH
  */
 
 import { store } from './store.js';
 import { renderCharts } from './charts.js';
 import { exportToJSON, exportToCSV, importFromJSON } from './export.js';
 import { processReceiptImage } from './ocr.js';
+import { bankSync, SUPPORTED_BANKS } from './bankSync.js';
 
 let currentReceiptImageData = null;
 
@@ -14,6 +15,7 @@ export function initUI() {
   setupModals();
   setupForms();
   setupOCRScanner();
+  setupBankSync();
   setupSettingsAndThemes();
   setupQuickTemplates();
   updateAllViews();
@@ -26,6 +28,7 @@ export function updateAllViews() {
   renderQuickTemplates();
   renderTransactionsList();
   renderAssetsAndLiabilities();
+  renderConnectedBanks();
   renderBudgetsAndGoals();
   renderCategoriesList();
   renderCharts();
@@ -88,7 +91,7 @@ function setupSettingsAndThemes() {
 }
 
 // -------------------------------------------------------------
-// Navigation Tabs (Desktop Sidebar + Mobile Bottom Bar)
+// Navigation Tabs
 // -------------------------------------------------------------
 function setupNavigation() {
   const navBtns = document.querySelectorAll('.nav-btn, .mobile-tab');
@@ -129,11 +132,91 @@ function updateSummaryCards() {
 }
 
 function renderStreak() {
-  const streak = store.getSettings().streakDays || 1;
+  const streak = store.getSettings().streakDays || 0;
   const streakEl = document.getElementById('streak-counter');
   if (streakEl) {
     streakEl.textContent = `🔥 ${streak} días seguidos`;
   }
+}
+
+// -------------------------------------------------------------
+// Bank Sync & Connection Setup
+// -------------------------------------------------------------
+function setupBankSync() {
+  const btnConnectBank = document.getElementById('btn-open-bank-modal');
+  const btnSyncHeader = document.getElementById('btn-sync-banks-header');
+  const modalBank = document.getElementById('modal-bank');
+  const bankGrid = document.getElementById('bank-selection-grid');
+
+  btnConnectBank?.addEventListener('click', () => showModal(modalBank));
+  btnSyncHeader?.addEventListener('click', () => {
+    const synced = bankSync.syncAllBanks();
+    updateAllViews();
+    showToast(synced > 0 ? `🟢 ${synced} banco(s) sincronizado(s)` : 'No hay bancos conectados aún');
+  });
+
+  // Render Banks List inside Modal
+  if (bankGrid) {
+    bankGrid.innerHTML = SUPPORTED_BANKS.map(b => `
+      <div class="bank-card-pick" data-bank-id="${b.id}">
+        <span class="bank-icon-lg">${b.icon}</span>
+        <div class="font-bold text-sm mb-1">${b.name}</div>
+        <button class="btn btn-secondary text-xs" style="width: 100%;">Conectar (Sandbox)</button>
+      </div>
+    `).join('');
+
+    bankGrid.querySelectorAll('.bank-card-pick').forEach(card => {
+      card.addEventListener('click', () => {
+        const bankId = card.dataset.bankId;
+        const result = bankSync.connectBankSandbox(bankId);
+        hideModal(modalBank);
+        updateAllViews();
+        showToast(`🎉 ¡${result.connection.accountName} conectada con éxito!`);
+      });
+    });
+  }
+}
+
+function renderConnectedBanks() {
+  const container = document.getElementById('connected-banks-list');
+  if (!container) return;
+
+  const connections = bankSync.getConnections();
+  if (connections.length === 0) {
+    container.innerHTML = `
+      <div class="card text-center p-4">
+        <p class="text-secondary text-sm mb-3">No tienes ningún banco conectado aún.</p>
+        <button class="btn btn-primary text-xs" onclick="document.getElementById('modal-bank').classList.add('active')">
+          🏛️ Conectar mi primer Banco
+        </button>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = connections.map(c => `
+    <div class="item-card flex-between">
+      <div class="flex-center gap-3">
+        <span class="item-icon">${c.icon}</span>
+        <div>
+          <div class="font-bold">${escapeHtml(c.accountName)}</div>
+          <div class="text-xs text-muted">Sincronizado: ${new Date(c.lastSynced).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+        </div>
+      </div>
+      <div class="flex-center gap-2">
+        <span class="category-badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">🟢 Conectado</span>
+        <button class="btn-icon danger text-xs" data-disconnect-bank="${c.id}">🗑️</button>
+      </div>
+    </div>
+  `).join('');
+
+  container.querySelectorAll('[data-disconnect-bank]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      bankSync.disconnectBank(btn.dataset.disconnectBank);
+      updateAllViews();
+      showToast('Banco desconectado');
+    });
+  });
 }
 
 // -------------------------------------------------------------
@@ -149,14 +232,12 @@ function setupOCRScanner() {
   const ocrPreviewImg = document.getElementById('ocr-preview-img');
 
   btnScan?.addEventListener('click', () => showModal(modalOCR));
-
   ocrDropzone?.addEventListener('click', () => ocrFileInput?.click());
 
   ocrFileInput?.addEventListener('change', async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    // Show image preview
     const reader = new FileReader();
     reader.onload = (ev) => {
       currentReceiptImageData = ev.target.result;
@@ -167,7 +248,6 @@ function setupOCRScanner() {
     };
     reader.readAsDataURL(file);
 
-    // Run OCR Processing
     ocrStatus.style.display = 'block';
     ocrStatus.textContent = '⏳ Leyendo ticket con IA...';
     if (ocrProgressBar) ocrProgressBar.style.width = '20%';
@@ -178,7 +258,6 @@ function setupOCRScanner() {
         if (ocrStatus) ocrStatus.textContent = msg;
       });
 
-      // Hide OCR modal & open Add Transaction modal with pre-filled fields
       hideModal(modalOCR);
 
       const modalTx = document.getElementById('modal-transaction');
@@ -187,7 +266,6 @@ function setupOCRScanner() {
       document.getElementById('tx-date').value = result.date || new Date().toISOString().split('T')[0];
       document.getElementById('tx-category').value = result.suggestedCategory;
 
-      // Show attached receipt thumbnail in Tx Modal
       const thumb = document.getElementById('tx-receipt-thumbnail');
       if (thumb) {
         thumb.src = currentReceiptImageData;
@@ -205,7 +283,7 @@ function setupOCRScanner() {
 }
 
 // -------------------------------------------------------------
-// Quick Templates (1-Tap Logging)
+// Quick Templates
 // -------------------------------------------------------------
 function setupQuickTemplates() {}
 
@@ -217,7 +295,6 @@ function renderQuickTemplates() {
   const sym = store.getSettings().currencySymbol || '€';
 
   container.innerHTML = tmpls.map(t => {
-    const cat = store.getCategoryById(t.categoryId);
     return `
       <div class="tmpl-btn" data-tmpl-id="${t.id}">
         <span class="tmpl-ic">${t.icon}</span>
@@ -240,7 +317,7 @@ function renderQuickTemplates() {
           date: new Date().toISOString().split('T')[0]
         });
         updateAllViews();
-        showToast(`⚡ Transacción rápida registrada: ${t.name}`);
+        showToast(`⚡ Transacción rápida: ${t.name}`);
       }
     });
   });
@@ -268,7 +345,7 @@ function renderTransactionsList() {
   }
 
   if (list.length === 0) {
-    container.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-muted">No se encontraron movimientos.</td></tr>`;
+    container.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-muted">No se encontraron movimientos registrados.</td></tr>`;
     return;
   }
 
@@ -297,7 +374,6 @@ function renderTransactionsList() {
     `;
   }).join('');
 
-  // Delete & View Receipt Handlers
   container.querySelectorAll('[data-delete-tx]').forEach(btn => {
     btn.addEventListener('click', () => {
       if (confirm('¿Eliminar esta transacción?')) {
@@ -390,44 +466,48 @@ function renderBudgetsAndGoals() {
 
   if (budgetsContainer) {
     const budgets = store.getBudgets();
-    budgetsContainer.innerHTML = budgets.map(b => {
-      const cat = store.getCategoryById(b.categoryId);
-      const spent = store.getCategorySpentThisMonth(b.categoryId);
-      const percent = Math.min(100, Math.round((spent / b.limit) * 100));
-      const isOver = spent > b.limit;
+    budgetsContainer.innerHTML = budgets.length === 0
+      ? '<p class="text-muted text-sm py-2">Sin presupuestos activos.</p>'
+      : budgets.map(b => {
+        const cat = store.getCategoryById(b.categoryId);
+        const spent = store.getCategorySpentThisMonth(b.categoryId);
+        const percent = Math.min(100, Math.round((spent / b.limit) * 100));
+        const isOver = spent > b.limit;
 
-      return `
-        <div class="mb-3 p-3 card">
-          <div class="flex-between mb-1">
-            <span class="font-bold text-sm">${cat.icon} ${cat.name}</span>
-            <span class="text-xs ${isOver ? 'text-danger font-bold' : 'text-secondary'}">
-              ${formatMoney(spent)} / ${formatMoney(b.limit)} ${sym} (${percent}%)
-            </span>
+        return `
+          <div class="mb-3 p-3 card">
+            <div class="flex-between mb-1">
+              <span class="font-bold text-sm">${cat.icon} ${cat.name}</span>
+              <span class="text-xs ${isOver ? 'text-danger font-bold' : 'text-secondary'}">
+                ${formatMoney(spent)} / ${formatMoney(b.limit)} ${sym} (${percent}%)
+              </span>
+            </div>
+            <div class="progress-bar-bg">
+              <div class="progress-bar-fill ${isOver ? 'danger' : ''}" style="width: ${percent}%;"></div>
+            </div>
           </div>
-          <div class="progress-bar-bg">
-            <div class="progress-bar-fill ${isOver ? 'danger' : ''}" style="width: ${percent}%;"></div>
-          </div>
-        </div>
-      `;
-    }).join('');
+        `;
+      }).join('');
   }
 
   if (goalsContainer) {
     const goals = store.getGoals();
-    goalsContainer.innerHTML = goals.map(g => {
-      const percent = Math.min(100, Math.round((g.saved / g.target) * 100));
-      return `
-        <div class="mb-3 p-3 card">
-          <div class="flex-between mb-1">
-            <span class="font-bold text-sm">${g.icon} ${escapeHtml(g.name)}</span>
-            <span class="text-xs text-success font-bold">${formatMoney(g.saved)} / ${formatMoney(g.target)} ${sym} (${percent}%)</span>
+    goalsContainer.innerHTML = goals.length === 0
+      ? '<p class="text-muted text-sm py-2">Sin metas de ahorro registradas.</p>'
+      : goals.map(g => {
+        const percent = Math.min(100, Math.round((g.saved / g.target) * 100));
+        return `
+          <div class="mb-3 p-3 card">
+            <div class="flex-between mb-1">
+              <span class="font-bold text-sm">${g.icon} ${escapeHtml(g.name)}</span>
+              <span class="text-xs text-success font-bold">${formatMoney(g.saved)} / ${formatMoney(g.target)} ${sym} (${percent}%)</span>
+            </div>
+            <div class="progress-bar-bg">
+              <div class="progress-bar-fill success" style="width: ${percent}%;"></div>
+            </div>
           </div>
-          <div class="progress-bar-bg">
-            <div class="progress-bar-fill success" style="width: ${percent}%;"></div>
-          </div>
-        </div>
-      `;
-    }).join('');
+        `;
+      }).join('');
   }
 }
 
